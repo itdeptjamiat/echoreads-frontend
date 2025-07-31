@@ -14,6 +14,8 @@
 - **expo-secure-store** for storing JWTs and user prefs
 - **expo-localization** for i18n and language support
 - **Moti** or **Reanimated v3** for animations and transitions
+- **lottie-react-native** for Lottie animations
+- **babel-plugin-module-resolver** for path aliases
 
 ---
 
