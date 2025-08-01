@@ -17,23 +17,9 @@
 
 See `/app` and `/src` directories.
 
-## 🚀 Implementation Status
-
-### ✅ Phase 1.1: Splash Screen & Animation
-- **Implementation**: Moti animations in `app/_layout.tsx`
-- **Fallback**: Native splash screen defined in `app.json`
-- **Animation**: Lottie integration with `src/assets/animations/splash.json`
-- **Features**:
-  - 2-second animated splash with fade-in/scale effects
-  - Dark theme background (`#202124`)
-  - Smooth transition to main app
-  - Platform-native fallback splash
-  - Lottie animation support for premium feel
-
 ## 📦 Modules (WIP)
 
-- [x] App Initialization ✅
-- [x] Phase 1.1: Splash Screen & Animation ✅
+- [ ] App Initialization
 - [ ] Auth
 - [ ] Onboarding
 - [ ] Home Feed
