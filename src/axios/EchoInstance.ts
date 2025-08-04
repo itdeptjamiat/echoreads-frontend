@@ -1,5 +1,8 @@
 import axios, { AxiosResponse, AxiosError } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { store } from '../redux/store';
+import { logout } from '../redux/slices/authSlice';
+import { router } from 'expo-router';
 
 export const API_BASE_URL = 'https://api.echoreads.online'; // EchoReads API base URL
 
@@ -27,18 +30,19 @@ export const attachAuthTokenToAsyncStorage = async (token: string) => {
 APIIns.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error: AxiosError) => {
-    const originalRequest = error.config;
-
-    // If unauthorized and request not retried
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
+    // If unauthorized, handle logout
+    if (error.response?.status === 401) {
       try {
+        // Clear token from AsyncStorage
         await AsyncStorage.removeItem('auth-token');
-        attachAuthToken(null);
+        
+        // Dispatch logout action to clear Redux state, token, and navigate
+        store.dispatch(logout());
+        
         return Promise.reject(error);
-      } catch (refreshError) {
-        return Promise.reject(refreshError);
+      } catch (logoutError) {
+        console.error('Error during logout:', logoutError);
+        return Promise.reject(error);
       }
     }
 

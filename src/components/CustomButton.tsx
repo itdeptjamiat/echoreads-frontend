@@ -4,15 +4,15 @@ import { useTheme } from '../hooks/useTheme';
 import { Body } from '../theme/Typo';
 
 interface CustomButtonProps extends TouchableOpacityProps {
-  title: string;
-  variant?: 'primary' | 'secondary' | 'outline';
-  loading?: boolean;
+  label: string;
+  onPress: () => void;
+  variant?: 'primary' | 'ghost';
 }
 
 export function CustomButton({ 
-  title, 
+  label, 
+  onPress, 
   variant = 'primary', 
-  loading = false, 
   style, 
   disabled,
   ...props 
@@ -22,10 +22,15 @@ export function CustomButton({
   const getButtonStyle = () => {
     const baseStyle = {
       padding: 16,
-      borderRadius: 8,
+      borderRadius: 12,
       alignItems: 'center' as const,
       justifyContent: 'center' as const,
-      opacity: (disabled || loading) ? 0.6 : 1,
+      opacity: disabled ? 0.6 : 1,
+      shadowColor: colors.text,
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.1,
+      shadowRadius: 4,
+      elevation: 2,
     };
 
     switch (variant) {
@@ -34,12 +39,7 @@ export function CustomButton({
           ...baseStyle,
           backgroundColor: colors.primary,
         };
-      case 'secondary':
-        return {
-          ...baseStyle,
-          backgroundColor: colors.secondary,
-        };
-      case 'outline':
+      case 'ghost':
         return {
           ...baseStyle,
           backgroundColor: 'transparent',
@@ -53,7 +53,7 @@ export function CustomButton({
 
   const getTextStyle = () => {
     switch (variant) {
-      case 'outline':
+      case 'ghost':
         return { color: colors.text };
       default:
         return { color: colors.card };
@@ -63,11 +63,12 @@ export function CustomButton({
   return (
     <TouchableOpacity
       style={[getButtonStyle(), style]}
-      disabled={disabled || loading}
+      onPress={onPress}
+      disabled={disabled}
       {...props}
     >
       <Body b center style={getTextStyle()}>
-        {loading ? 'Loading...' : title}
+        {label}
       </Body>
     </TouchableOpacity>
   );

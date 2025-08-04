@@ -263,4 +263,85 @@ Always reference these for module creation:
 
 ---
 
-**🎯 Training Result**: Cursor AI can now autonomously create consistent, high-quality Redux modules for EchoReads following established architectural patterns. 
+**🎯 Training Result**: Cursor AI can now autonomously create consistent, high-quality Redux modules for EchoReads following established architectural patterns.
+
+---
+
+## 🔐 Authentication Rules
+
+### Mandatory Authentication Patterns
+
+#### 1. **Form Validation**
+- All auth forms **must use Zod + React Hook Form**
+- No custom validation or form libraries allowed
+- Use `FormProvider` wrapper with Zod schemas
+- Use `TextField` component for all inputs
+
+#### 2. **Token Storage**
+- Auth tokens must be stored in **Redux Persist (auth only)**
+- Never use AsyncStorage directly for tokens
+- Never use expo-secure-store for tokens
+- Only persist auth slice state via redux-persist whitelist
+
+#### 3. **Token Management**
+- Auth headers must be attached using `attachAuthToken(token)`
+- Use `selectToken` selector to get token from Redux state
+- Call `attachAuthToken()` in `_layout.tsx` on app startup
+- Clear tokens using `attachAuthToken(null)` on logout
+
+#### 4. **Error Handling**
+- Handle 401 errors globally via Axios interceptor
+- 401 errors must dispatch `logout()` action automatically
+- Never handle 401 errors in individual components
+- Use Redux auth error state for form error display
+
+#### 5. **Authentication Flow**
+- Login → Store token in Redux → Attach to Axios → Navigate to app
+- Logout → Clear Redux state → Clear Axios headers → Navigate to auth
+- 401 Error → Clear token → Clear state → Navigate to auth
+
+#### 6. **Prohibited Patterns**
+- ❌ No direct AsyncStorage token storage
+- ❌ No expo-secure-store for auth tokens
+- ❌ No manual 401 error handling in components
+- ❌ No custom form validation libraries
+- ❌ No direct axios usage without EchoInstance
+- ❌ No token storage outside Redux Persist
+
+#### 7. **Required Components**
+- Use `FormProvider` for all auth forms
+- Use `TextField` for all form inputs
+- Use `CustomButton` for all buttons
+- Use `useTheme()` for all styling
+- Use `H1` and `Body` from Typo system
+
+#### 8. **State Management**
+- All auth state in `authSlice.ts`
+- Use `createAsyncThunk` for all auth API calls
+- Use `createSelector` for all auth selectors
+- Export selectors from `selectState.ts`
+- Persist only auth state via redux-persist
+
+### Authentication File Structure
+```
+src/
+├── redux/
+│   ├── slices/authSlice.ts          # Auth state + reducers
+│   ├── actions/authActions.ts       # Auth async thunks
+│   └── slices/selectState.ts        # Auth selectors
+├── form/
+│   ├── FormProvider.tsx             # Form wrapper
+│   ├── TextField.tsx                # Input component
+│   └── schemas/authSchema.ts        # Zod validation schemas
+├── axios/
+│   └── EchoInstance.ts              # Axios with auth interceptors
+└── hooks/
+    └── useTheme.ts                  # Theme hook
+
+app/(auth)/
+├── login.tsx                        # Sign in form
+├── signup.tsx                       # Registration form
+├── verifyEmail.tsx                  # OTP verification
+├── forgotPassword.tsx               # Password reset
+└── resetPassword.tsx                # New password form
+``` 

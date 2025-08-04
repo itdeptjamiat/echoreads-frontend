@@ -55,6 +55,18 @@ See `/app` and `/src` directories.
 - **Theme Integration**: All form components use useTheme() colors
 - **No Inline Forms**: Always use FormProvider and TextField components
 
+### 🔐 Authentication Actions
+
+**Redux async thunks for complete auth flow**
+- **loginUser**: Login with email/password, attaches JWT to Axios headers
+- **signupUser**: User registration with email/username/password/name
+- **forgotPassword**: Request password reset email
+- **confirmEmail**: Verify email with OTP code
+- **resetPassword**: Set new password after OTP verification
+- **getUserData**: Fetch user profile data
+- **State Persistence**: Auth state persisted via redux-persist (AsyncStorage)
+- **Error Handling**: Consistent error messages with rejectWithValue
+
 ### Token Boot Flow
 
 - **App Startup**: `_layout.tsx` reads token from Redux with `selectToken`
@@ -69,10 +81,7 @@ Current state structure with persistence configuration:
 ```typescript
 RootState = {
   auth: AuthState,           // ✅ Persisted (auth data, profile updates, user data)
-  listing: ListingState,     // Magazines and articles data
-  bid: BidState,            // Bidding functionality (future)
-  chat: ChatState,          // Chat conversations (future)
-  orders: OrdersState,      // Order management (future)
+  orders: OrdersState,       // Order management
   
   // Future modules will be added here following MODULE_CREATION_TEMPLATE.md:
   // wallet: WalletState,      // ✅ Persisted (if needed)
@@ -104,6 +113,7 @@ interface AuthState {
 - [x] Auth UI Components (Login Screen)
 - [x] ✅ Phase: Login (Zod Validation + React Hook Form + User Info Display)
 - [x] ✅ Form System (React Hook Form + Zod + Reusable Components)
+- [x] ✅ Auth Actions (Redux Async Thunks with Redux Persist)
 - [ ] Onboarding
 - [ ] Home Feed
 - [ ] Search
@@ -112,6 +122,105 @@ interface AuthState {
 - [ ] Kids Mode
 - [ ] Article/Magazine/Digest View
 - [ ] Profile & Settings
+
+## 📁 /app/(auth) Screens
+
+### Authentication Flow Screens
+- **`login.tsx`**: Sign in form using Zod + React Hook Form validation
+- **`signup.tsx`**: Register new user with email/password/confirmPassword
+- **`verifyEmail.tsx`**: OTP verification for email confirmation
+- **`forgotPassword.tsx`**: Start password reset flow
+- **`resetPassword.tsx`**: Set new password after OTP verification
+
+### Features
+- **Modern UI**: Theme-aware design with consistent spacing
+- **Form Validation**: Zod schemas with React Hook Form integration
+- **Accessibility**: Screen reader support with proper labels
+- **Error Handling**: Redux state management with user feedback
+- **Loading States**: Disabled buttons and loading indicators
+
+## 🧠 Redux Store
+
+### Auth Slice (`authSlice.ts`)
+Complete authentication state management with async thunks:
+
+#### Actions
+- **`loginUser`**: Authenticate user with email/password
+- **`signupUser`**: Register new user account
+- **`confirmEmail`**: Verify email with OTP code
+- **`forgotPassword`**: Request password reset email
+- **`resetPassword`**: Set new password after verification
+- **`updatePassword`**: Update user password
+- **`logout`**: Clear auth state and navigate to auth
+- **`clearError`**: Clear error state
+
+#### State Structure
+```typescript
+interface AuthState {
+  data: AuthData | null;           // Main auth data (token, user)
+  isLoading: boolean;              // Global loading state
+  error: string | null;            // Global error state
+  profileUpdate: ProfileUpdateData; // Profile update operations
+  userData: UserData;              // User data operations
+}
+```
+
+## 🔍 Selectors
+
+### Memoized Auth Selectors
+All selectors use `createSelector` for performance optimization:
+
+- **`selectToken`**: Get authentication token from state
+- **`selectUserData`**: Get user data from userData operations
+- **`selectAuthLoading`**: Get global loading state
+- **`selectAuthError`**: Get global error state
+- **`selectUserId`**: Get user ID from auth data
+- **`selectUserEmail`**: Get user email from auth data
+- **`selectIsAuthenticated`**: Boolean indicating if user is authenticated
+
+### Usage
+```typescript
+import { useSelector } from 'react-redux';
+import { 
+  selectToken, 
+  selectUserData, 
+  selectAuthLoading, 
+  selectAuthError 
+} from '../redux/slices/selectState';
+
+const token = useSelector(selectToken);
+const isLoading = useSelector(selectAuthLoading);
+```
+
+## ✅ Zod Validation Schemas
+
+### Form Validation Schemas
+Type-safe validation using Zod for all authentication forms:
+
+- **`loginSchema`**: Email and password validation
+- **`signupSchema`**: Email, password, and confirmPassword with matching validation
+- **`otpSchema`**: OTP code validation (6 digits)
+- **`forgotPasswordSchema`**: Email validation for password reset
+- **`resetPasswordSchema`**: New password and confirmPassword with matching validation
+
+### Features
+- **Type Safety**: Full TypeScript integration
+- **Error Messages**: User-friendly validation messages
+- **Password Matching**: Automatic password confirmation validation
+- **Email Validation**: Proper email format validation
+- **Required Fields**: Clear indication of required inputs
+
+### Usage
+```typescript
+import { loginSchema, signupSchema } from '../form/schemas/authSchema';
+
+// In FormProvider
+<FormProvider
+  schema={loginSchema}
+  defaultValues={{ email: '', password: '' }}
+  onSubmit={handleSubmit}
+>
+```
 
 ## 🤖 Cursor AI Training & Instructions
 
@@ -324,9 +433,6 @@ import [moduleName]Reducer from './slices/[moduleName]Slice';
 // Update rootReducer
 const rootReducer = combineReducers({
   auth: authReducer,
-  listing: listingReducer,
-  bid: bidReducer,
-  chat: chatReducer,
   orders: ordersReducer,
   [moduleName]: [moduleName]Reducer, // ADD THIS LINE
 });
@@ -473,9 +579,6 @@ src/redux/
 │   └── authActions.ts
 ├── slices/                  # State + reducers
 │   ├── authSlice.ts
-│   ├── listingSlice.ts
-│   ├── bidSlice.ts
-│   ├── chatSlice.ts
 │   └── ordersSlice.ts
 ├── selectors/               # Memoized state selectors
 │   ├── index.ts            # Barrel exports

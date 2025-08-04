@@ -1,14 +1,20 @@
-import { Button, StyleSheet, Text, View } from 'react-native'
+import { StyleSheet, View, Image } from 'react-native'
 import React from 'react'
-import { useRouter } from 'expo-router';
+import { useTheme } from '../src/hooks/useTheme';
+import { H1 } from '../src/theme/Typo';
 
 const Page = () => {
-    const router = useRouter();
+  const { colors } = useTheme();
+  
   return (
-    <View style={styles.container}>
-      <Text>Page</Text>
-      <Button title='Go to Home' onPress={() => router.push('/(auth)/')} />
-      <Button title='Go to Auth' onPress={() => router.push('/(tabs)/')} />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Image 
+        source={require('../assets/logo.png')} 
+        style={styles.logo} 
+      />
+      <H1 center style={{ color: colors.text, marginTop: 24 }}>
+        EchoReads
+      </H1>
     </View>
   )
 }
@@ -20,5 +26,9 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    logo: {
+        width: 120,
+        height: 120,
     },
 });

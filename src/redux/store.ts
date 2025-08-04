@@ -4,7 +4,6 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Import reducers
 import authReducer from './slices/authSlice';
-import listingReducer from './slices/listingSlice';
 import ordersReducer from './slices/ordersSlice';
 
 // Redux persist configuration
@@ -17,7 +16,6 @@ const persistConfig = {
 // Combine reducers
 const rootReducer = combineReducers({
   auth: authReducer,
-  listing: listingReducer,
   orders: ordersReducer,
 });
 

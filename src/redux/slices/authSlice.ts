@@ -1,4 +1,14 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { 
+  loginUser, 
+  signupUser, 
+  forgotPassword, 
+  confirmEmail, 
+  resetPassword, 
+  getUserData 
+} from '../actions/authActions';
+import { attachAuthToken } from '../../axios/EchoInstance';
+import { router } from 'expo-router';
 
 // Types
 interface AuthData {
@@ -85,6 +95,29 @@ const authSlice = createSlice({
       };
     },
 
+    // Logout action with side effects
+    logout: (state) => {
+      // Clear auth data
+      state.data = null;
+      state.error = null;
+      state.profileUpdate = {
+        loading: false,
+        error: null,
+        data: null,
+      };
+      state.userData = {
+        loading: false,
+        error: null,
+        data: null,
+      };
+      
+      // Clear token from Axios headers
+      attachAuthToken(null);
+      
+      // Navigate to auth screen
+      router.replace('/(auth)/');
+    },
+
     // Set error
     setError: (state, action: PayloadAction<string>) => {
       state.error = action.payload;
@@ -129,6 +162,108 @@ const authSlice = createSlice({
       state.userData.loading = false;
     },
   },
+  extraReducers: (builder) => {
+    // Login User
+    builder
+      .addCase(loginUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(loginUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.data = {
+          token: action.payload.token,
+          user: action.payload.user,
+        };
+        state.error = null;
+      })
+      .addCase(loginUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Signup User
+    builder
+      .addCase(signupUser.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(signupUser.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(signupUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Forgot Password
+    builder
+      .addCase(forgotPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(forgotPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(forgotPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Confirm Email
+    builder
+      .addCase(confirmEmail.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(confirmEmail.fulfilled, (state, action) => {
+        state.isLoading = false;
+        if (action.payload.token) {
+          state.data = {
+            token: action.payload.token,
+            user: action.payload.user,
+          };
+        }
+        state.error = null;
+      })
+      .addCase(confirmEmail.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Reset Password
+    builder
+      .addCase(resetPassword.pending, (state) => {
+        state.isLoading = true;
+        state.error = null;
+      })
+      .addCase(resetPassword.fulfilled, (state) => {
+        state.isLoading = false;
+        state.error = null;
+      })
+      .addCase(resetPassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.error = action.payload as string;
+      });
+
+    // Get User Data
+    builder
+      .addCase(getUserData.pending, (state) => {
+        state.userData.loading = true;
+        state.userData.error = null;
+      })
+      .addCase(getUserData.fulfilled, (state, action) => {
+        state.userData.loading = false;
+        state.userData.data = action.payload;
+        state.userData.error = null;
+      })
+      .addCase(getUserData.rejected, (state, action) => {
+        state.userData.loading = false;
+        state.userData.error = action.payload as string;
+      });
+  },
 });
 
 // Export actions
@@ -137,6 +272,7 @@ export const {
   setLoading,
   setAuthData,
   clearAuthData,
+  logout,
   setError,
   setProfileUpdateLoading,
   setProfileUpdateData,
