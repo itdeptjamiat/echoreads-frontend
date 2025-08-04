@@ -6,7 +6,7 @@ import { ThemeProvider } from '../src/theme/ThemeContext';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from '../src/redux/store';
-import { selectToken } from '../src/redux/selectors';
+import { selectToken } from '../src/redux/slices/selectState';
 import { attachAuthToken } from '../src/axios/EchoInstance';
 
 // Custom Navigation component to handle auth routing
@@ -28,12 +28,12 @@ function Navigation() {
           console.log('⚠️ No token found on startup');
           
           // Navigate to onboarding
-          router.replace('/onboarding/');
+          router.replace('/(onboarding)/');
         }
       } catch (error) {
         console.error('Navigation error:', error);
         // Fallback to onboarding on error
-        router.replace('/onboarding/');
+        router.replace('/(onboarding)/');
       } finally {
         setIsLoading(false);
       }

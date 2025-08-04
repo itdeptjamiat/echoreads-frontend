@@ -114,7 +114,7 @@ interface AuthState {
 - [x] ✅ Phase: Login (Zod Validation + React Hook Form + User Info Display)
 - [x] ✅ Form System (React Hook Form + Zod + Reusable Components)
 - [x] ✅ Auth Actions (Redux Async Thunks with Redux Persist)
-- [ ] Onboarding
+- [x] ✅ Onboarding (Intro Carousel + Plan Selection + Checkout + Confirmation)
 - [ ] Home Feed
 - [ ] Search
 - [ ] Library
@@ -138,6 +138,31 @@ interface AuthState {
 - **Accessibility**: Screen reader support with proper labels
 - **Error Handling**: Redux state management with user feedback
 - **Loading States**: Disabled buttons and loading indicators
+
+## 📱 /app/(onboarding) Screens
+
+### Onboarding Flow Screens
+- **`intro.tsx`**: Walkthrough carousel with title, subtitle, next/skip buttons
+- **`choosePlan.tsx`**: Selectable cards for Free, Echo Plus, Echo Pro plans
+- **`checkout.tsx`**: WebView for Stripe checkout URL integration
+- **`confirmation.tsx`**: Confirmation screen after successful payment
+
+### Features
+- **Interactive Carousel**: Smooth slide transitions with pagination dots
+- **Plan Selection**: Visual plan cards with feature comparisons
+- **Secure Checkout**: WebView integration with Stripe payment processing
+- **Success Flow**: Confirmation screen with plan details and next steps
+- **Theme Integration**: Consistent theming with useTheme() and Typo components
+- **Accessibility**: Screen reader support with proper labels and navigation
+- **Navigation Flow**: Seamless transitions between onboarding steps
+
+### Technical Implementation
+- **FlatList Carousel**: Horizontal scrolling with paging for intro slides
+- **TouchableOpacity Cards**: Interactive plan selection with visual feedback
+- **WebView Integration**: Secure payment processing with message handling
+- **State Management**: Local state for plan selection and loading states
+- **Error Handling**: Alert dialogs for checkout cancellation
+- **Responsive Design**: Adaptive layouts for different screen sizes
 
 ## 🧠 Redux Store
 

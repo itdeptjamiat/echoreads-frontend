@@ -7,7 +7,7 @@ import {
   resetPassword, 
   getUserData 
 } from '../actions/authActions';
-import { attachAuthToken } from '../../axios/EchoInstance';
+import { attachAuthToken, setLogoutHandler } from '../../axios/EchoInstance';
 import { router } from 'expo-router';
 
 // Types
@@ -281,6 +281,12 @@ export const {
   setUserData,
   setUserDataError,
 } = authSlice.actions;
+
+// Set up logout handler for 401 interceptor
+setLogoutHandler(() => {
+  // This will be called by the 401 interceptor
+  router.replace('/(auth)/');
+});
 
 // Export reducer
 export default authSlice.reducer;  

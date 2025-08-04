@@ -14,6 +14,7 @@
 - **expo-secure-store** for storing JWTs and user prefs
 - **expo-localization** for i18n and language support
 - **Moti** or **Reanimated v3** for animations and transitions
+- **react-native-webview** for embedded web content and payment processing
 
 ---
 
@@ -101,6 +102,8 @@ Do not place logic inside `/app`. Only screens go here.
 - ❌ No `useState` for theme, language, or auth
 - ❌ No screen logic outside `/app`
 - ❌ No unapproved packages unless added to `RULES.md`
+- ❌ No direct WebView usage without proper error handling
+- ❌ No payment processing without secure WebView implementation
 
 ---
 

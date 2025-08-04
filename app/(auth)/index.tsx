@@ -12,7 +12,7 @@ import {
   selectUser,
   selectUserEmail,
   selectUserName 
-} from '../../src/redux/selectors';
+} from '../../src/redux/selectors/authSelectors';
 import { AppDispatch } from '../../src/redux/store';
 import { FormProvider, TextField } from '../../src/form';
 
