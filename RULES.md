@@ -13,7 +13,9 @@
 - **Axios** configured instance with interceptors and auth handling
 - **expo-secure-store** for storing JWTs and user prefs
 - **expo-localization** for i18n and language support
-- **Moti** or **Reanimated v3** for animations and transitions
+- **React Native Reanimated** for animations and transitions
+- **expo-linear-gradient** for gradients and modern UI effects
+- **react-native-vector-icons** for consistent iconography (Ionicons)
 - **react-native-webview** for embedded web content and payment processing
 
 ---
@@ -26,12 +28,20 @@ Do not place logic inside `/app`. Only screens go here.
 
 ---
 
-### 2. 🎨 Theming System Must Use:
+### 2. 🎨 Modern UI & Theming System Must Use:
 
-- `src/theme/ThemeContext.tsx`
-- `src/hooks/useTheme.ts`
-- Must support Light, Dark, and System modes
-- Should be available globally via `_layout.tsx` and Context API
+- **Modern Admin Panel Colors**: Light/dark mode with gradient support
+- **ThemeContext**: `src/theme/ThemeContext.tsx` with `toggleTheme()` function
+- **useTheme Hook**: `src/hooks/useTheme.ts` for accessing colors and theme mode
+- **Color Tokens**: Consistent color system (primary, secondary, accent, muted, etc.)
+- **Gradient Support**: Three preset gradients (Primary, Secondary, Accent)
+- **Dark Mode**: Seamless theme switching with proper contrast ratios
+- **Component Integration**: All UI components must use useTheme() colors
+- **No Hardcoded Colors**: All colors must come from theme system
+- **Typography**: Use H1/Body components from `src/theme/Typo.tsx`
+- **Animations**: Reanimated spring/timing animations for interactions
+- **Vector Icons**: Ionicons only, with theme-aware colors
+- **Accessibility**: Proper labels, contrast, and screen reader support
 
 ---
 
@@ -96,12 +106,60 @@ Do not place logic inside `/app`. Only screens go here.
 
 ---
 
-### 8. ❌ Prohibited Patterns:
+### 8. 🎨 Modern UI Components Must Use:
 
-- ❌ No inline styling
-- ❌ No `useState` for theme, language, or auth
-- ❌ No screen logic outside `/app`
+#### Required Component Architecture:
+- **ButtonSelectorGroup**: Animated category selectors with gradient variants
+- **PostCard**: Content cards with gradient overlays, shadows, and animations
+- **SearchBar**: Advanced search with filter integration and focus animations
+- **CustomButton**: Enhanced buttons with gradient/primary/ghost variants
+
+#### Component Standards:
+- **Reanimated Integration**: All interactive components use spring animations
+- **Gradient Support**: LinearGradient for enhanced visual appeal
+- **Theme Consistency**: All components use useTheme() for colors
+- **Performance**: Memoized styles and optimized animations
+- **Accessibility**: Full screen reader support with proper ARIA labels
+- **Responsive Design**: Adaptive layouts for different screen sizes
+
+#### Animation Requirements:
+- **Spring Animations**: Use `withSpring()` for button presses and interactions
+- **Fade Transitions**: Use `FadeInDown`, `FadeInUp` for content loading
+- **Layout Animations**: Use `Layout.springify()` for dynamic content
+- **Scroll Interactions**: Animated scroll handlers for parallax effects
+- **Micro-interactions**: Scale animations on touch with proper feedback
+
+#### Visual Standards:
+- **Shadows & Elevation**: Consistent shadow patterns across cards and buttons
+- **Border Radius**: 12-20px for modern rounded corners
+- **Card Design**: White/dark cards with proper elevation and spacing
+- **Typography Scale**: Consistent font sizes and weights across components
+- **Color Contrast**: WCAG compliant contrast ratios for accessibility
+
+---
+
+### 9. ❌ Prohibited Patterns:
+
+#### General Patterns:
+- ❌ No inline styling - use StyleSheet.create() or useTheme()
+- ❌ No `useState` for theme, language, or auth - use Context/Redux
+- ❌ No screen logic outside `/app` - business logic in `/src`
 - ❌ No unapproved packages unless added to `RULES.md`
+
+#### UI/Theme Patterns:
+- ❌ No hardcoded colors - must use theme system
+- ❌ No direct style objects - use StyleSheet.create()
+- ❌ No custom form components - use FormProvider/TextField
+- ❌ No non-Ionicons vector icons - standardize on Ionicons
+- ❌ No animations without Reanimated - no Animated API
+- ❌ No custom HTTP clients - only EchoInstance.ts allowed
+
+#### Component Patterns:
+- ❌ No custom button implementations - use CustomButton variants
+- ❌ No custom card components - use PostCard component
+- ❌ No custom search inputs - use SearchBar component
+- ❌ No custom category selectors - use ButtonSelectorGroup
+- ❌ No custom navigation bars - use standard Expo Router layouts
 - ❌ No direct WebView usage without proper error handling
 - ❌ No payment processing without secure WebView implementation
 

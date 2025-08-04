@@ -1,12 +1,13 @@
 import React from 'react';
-import { View, TextInput, TextInputProps, StyleSheet } from 'react-native';
+import { View, TextInput, StyleSheet, TextInputProps } from 'react-native';
 import { useFormContext, Controller } from 'react-hook-form';
 import { useTheme } from '../hooks/useTheme';
 import { Body } from '../theme/Typo';
 
-interface TextFieldProps extends Omit<TextInputProps, 'onChangeText' | 'onBlur' | 'value'> {
+interface TextFieldProps extends TextInputProps {
   name: string;
-  label?: string;
+  placeholder: string;
+  rightIcon?: React.ReactNode; // New prop for right icon
 }
 
 export function TextField({ name, label, style, ...props }: TextFieldProps) {
@@ -36,6 +37,20 @@ export function TextField({ name, label, style, ...props }: TextFieldProps) {
       marginTop: 4,
       fontSize: 14,
     },
+    inputContainer: {
+      position: 'relative',
+    },
+    inputError: {
+      borderColor: colors.danger,
+      borderWidth: 2,
+    },
+    rightIcon: {
+      position: 'absolute',
+      right: 16,
+      top: 16,
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
   });
 
   return (
@@ -45,17 +60,26 @@ export function TextField({ name, label, style, ...props }: TextFieldProps) {
       )}
       
       <Controller
-        control={control}
         name={name}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <TextInput
-            {...props}
-            style={[styles.input, style]}
-            value={value}
-            onChangeText={onChange}
-            onBlur={onBlur}
-            placeholderTextColor={colors.border}
-          />
+        control={control}
+        render={({ field: { onChange, onBlur, value }, fieldState: { error } }) => (
+          <View style={styles.container}>
+            <View style={[styles.inputContainer, error ? styles.inputError : null]}>
+              <TextInput
+                style={styles.input}
+                placeholder={props.placeholder}
+                onBlur={onBlur}
+                onChangeText={onChange}
+                value={value}
+                placeholderTextColor={colors.textSecondary}
+                {...props}
+              />
+              {props.rightIcon && <View style={styles.rightIcon}>{props.rightIcon}</View>}
+            </View>
+            {error && (
+              <Body style={styles.errorText}>{error.message}</Body>
+            )}
+          </View>
         )}
       />
       

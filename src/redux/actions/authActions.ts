@@ -37,11 +37,12 @@ export const loginUser = createAsyncThunk(
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       const response = await APIIns.post(API_URLS.auth.login, credentials);
-      
+      console.log('response', response.data);
       // Attach token to Axios headers (auth state persisted via redux-persist)
       if (response.data.token) {
         attachAuthToken(response.data.token);
       }
+      
       
       console.log('Success: Login successful!');
       return response.data;

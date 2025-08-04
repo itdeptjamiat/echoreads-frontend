@@ -1,21 +1,35 @@
-import React from 'react';
-import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import React, { useState } from 'react';
+import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../src/hooks/useTheme';
 import { H1, Body } from '../../src/theme/Typo';
-import { FormProvider, TextField } from '../../src/form';
+import { FormProvider, TextField, useFormContext } from '../../src/form';
 import { CustomButton } from '../../src/components/CustomButton';
 import { resetPasswordSchema, ResetPasswordFormData } from '../../src/form/schemas/authSchema';
+import { useDispatch } from 'react-redux';
+import { resetPassword } from '../../src/redux/actions/authActions';
+import { router } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function ResetPasswordScreen() {
   const { colors } = useTheme();
 
-  const handleSubmit = async (data: ResetPasswordFormData) => {
+  const dispatch = useDispatch();
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  // Update handleSubmit to map data
+  const handleSubmit = async (data) => {
     try {
-      console.log('Password reset attempt');
-      // TODO: Implement password reset logic with Redux
-      // await dispatch(resetPassword(data)).unwrap();
+      const payload = {
+        email: data.email, // Assume email is in form or from params
+        otp: data.otp,
+        newPassword: data.newPassword,
+        confirmPassword: data.confirmNewPassword
+      };
+      await dispatch(resetPassword(payload)).unwrap();
+      Alert.alert('Success', 'Password reset successful');
+      router.push('/(auth)/');
     } catch (error) {
-      console.error('Password reset failed:', error);
+      Alert.alert('Error', error.message || 'Failed to reset password');
     }
   };
 
@@ -74,7 +88,12 @@ export default function ResetPasswordScreen() {
             <TextField
               name="newPassword"
               placeholder="New Password"
-              secureTextEntry
+              secureTextEntry={!showNewPassword}
+              rightIcon={(
+                <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
+                  <Ionicons name={showNewPassword ? 'eye-off' : 'eye'} size={24} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="new-password"
@@ -83,23 +102,35 @@ export default function ResetPasswordScreen() {
             <TextField
               name="confirmNewPassword"
               placeholder="Confirm New Password"
-              secureTextEntry
+              secureTextEntry={!showConfirmPassword}
+              rightIcon={(
+                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+                  <Ionicons name={showConfirmPassword ? 'eye-off' : 'eye'} size={24} color={colors.textSecondary} />
+                </TouchableOpacity>
+              )}
               autoCapitalize="none"
               autoCorrect={false}
               autoComplete="new-password"
             />
 
             <View style={styles.buttonContainer}>
-              <CustomButton
-                title="Reset Password"
-                onPress={() => {
-                  // Form submission is handled by FormProvider
-                }}
-              />
+              <SubmitButton />
             </View>
           </FormProvider>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+} 
+
+function SubmitButton() {
+  const { handleSubmit } = useFormContext();
+  return (
+    <CustomButton
+      label="Reset Password"
+      onPress={handleSubmit}
+      accessibilityLabel="Reset password button"
+      accessible={true}
+    />
   );
 } 

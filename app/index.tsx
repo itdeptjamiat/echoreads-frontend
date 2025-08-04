@@ -8,6 +8,24 @@ import { router } from 'expo-router';
 
 const Page = () => {
   const { colors } = useTheme();
+  const token = useSelector(selectToken);
+
+  useEffect(() => {
+    const handleNavigation = () => {
+      if (token) {
+        // User has a token, navigate to main app
+        console.log('🔐 Token found, navigating to main app');
+        router.replace('/(tabs)/');
+      } else {
+        // No token, navigate to onboarding intro first
+        console.log('⚠️ No token found, navigating to onboarding');
+        router.replace('/(onboarding)/');
+      }
+    };
+    handleNavigation();
+
+  }, [token]); // Remove token dependency to prevent re-runs
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Image 

@@ -1,21 +1,29 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useTheme } from '../../src/hooks/useTheme';
 import { H1, Body } from '../../src/theme/Typo';
-import { FormProvider, TextField } from '../../src/form';
+import { FormProvider, TextField, useFormContext } from '../../src/form';
 import { CustomButton } from '../../src/components/CustomButton';
 import { verifyEmailSchema, VerifyEmailFormData } from '../../src/form/schemas/authSchema';
+import { useDispatch } from 'react-redux';
+import { confirmEmail } from '../../src/redux/actions/authActions';
+import { router } from 'expo-router';
 
 export default function VerifyEmailScreen() {
   const { colors } = useTheme();
 
-  const handleSubmit = async (data: VerifyEmailFormData) => {
+  const dispatch = useDispatch();
+  const handleSubmit = async (data) => {
     try {
-      console.log('Email verification attempt:', data.email);
-      // TODO: Implement email verification logic with Redux
-      // await dispatch(verifyEmail(data)).unwrap();
+      const payload = {
+        email: data.email,
+        otp: data.otpCode
+      };
+      await dispatch(confirmEmail(payload)).unwrap();
+      Alert.alert('Success', 'Email verified successfully');
+      router.push('/(auth)/');
     } catch (error) {
-      console.error('Email verification failed:', error);
+      Alert.alert('Error', error.message || 'Failed to verify email');
     }
   };
 
@@ -82,24 +90,30 @@ export default function VerifyEmailScreen() {
 
             <TextField
               name="otpCode"
-              placeholder="Enter 6-digit code"
+              placeholder="OTP Code"
               keyboardType="number-pad"
-              autoCapitalize="none"
-              autoCorrect={false}
               maxLength={6}
+              autoComplete="one-time-code"
             />
 
             <View style={styles.buttonContainer}>
-              <CustomButton
-                title="Verify Email"
-                onPress={() => {
-                  // Form submission is handled by FormProvider
-                }}
-              />
+              <SubmitButton />
             </View>
           </FormProvider>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+  );
+} 
+
+function SubmitButton() {
+  const { handleSubmit } = useFormContext();
+  return (
+    <CustomButton
+      label="Verify Email"
+      onPress={handleSubmit}
+      accessibilityLabel="Verify email button"
+      accessible={true}
+    />
   );
 } 

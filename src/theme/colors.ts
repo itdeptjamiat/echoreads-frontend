@@ -1,23 +1,47 @@
-export const lightTheme = {
-  mode: 'light',
-  primary: '#FF6A2C',       // Vibrant orange for key actions and highlights
-  secondary: '#FFD3B5',     // Soft peach gradient/accent
-  background: '#F5F1EF',    // Light beige background
-  card: '#FFFFFF',          // White cards
-  text: '#1A1A1A',          // Almost black text
-  border: '#E6E0DC',        // Light border
-  success: '#4CAF50',       // Green (standard for success)
-  danger: '#FF4E4E',        // Red for errors
+export const lightColors = {
+  background: '#f8fafc',
+  foreground: '#0f172a',
+  text: '#0f172a',
+  textSecondary: '#64748b',
+  primary: '#3b82f6',
+  secondary: '#64748b',
+  accent: '#8b5cf6',
+  destructive: '#ef4444',
+  danger: '#ef4444',
+  muted: '#f1f5f9',
+  border: '#e2e8f0',
+  card: '#ffffff',
+  success: '#10b981',
+  warning: '#f59e0b',
+  info: '#06b6d4',
+  shadow: 'rgba(0, 0, 0, 0.1)',
+  gradientPrimary: ['#3b82f6', '#1d4ed8'],
+  gradientSecondary: ['#8b5cf6', '#7c3aed'],
+  gradientAccent: ['#06b6d4', '#0891b2'],
 };
 
-export const darkTheme = {
-  mode: 'dark',
-  primary: '#FF854D',       // Slightly softened orange for dark background contrast
-  secondary: '#FFB68D',     // Warm peach for softer highlights
-  background: '#1C1B1F',    // Dark background
-  card: '#2C2C2E',          // Dark gray card color
-  text: '#F5F5F5',          // White-ish text for readability
-  border: '#3A3A3C',        // Dark border tone
-  success: '#27AE60',       // Slightly deeper green
-  danger: '#E74C3C',        // Rich red for alerts
+export const darkColors = {
+  background: '#0f172a',
+  foreground: '#f8fafc',
+  text: '#f8fafc',
+  textSecondary: '#94a3b8',
+  primary: '#3b82f6',
+  secondary: '#64748b',
+  accent: '#8b5cf6',
+  destructive: '#ef4444',
+  danger: '#ef4444',
+  muted: '#1e293b',
+  border: '#334155',
+  card: '#1e293b',
+  success: '#10b981',
+  warning: '#f59e0b',
+  info: '#06b6d4',
+  shadow: 'rgba(0, 0, 0, 0.3)',
+  gradientPrimary: ['#3b82f6', '#1d4ed8'],
+  gradientSecondary: ['#8b5cf6', '#7c3aed'],
+  gradientAccent: ['#06b6d4', '#0891b2'],
 };
+
+// Legacy support for existing components
+export const lightTheme = lightColors;
+export const darkTheme = darkColors;

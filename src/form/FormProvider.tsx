@@ -1,5 +1,6 @@
-import React from 'react';
-import { FormProvider as RHFFormProvider, useForm } from 'react-hook-form';
+import React, { createContext, useContext } from 'react';
+import { View } from 'react-native';
+import { FormProvider as RHFFormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
@@ -8,6 +9,21 @@ interface FormProviderProps {
   defaultValues?: any;
   onSubmit: (data: any) => void | Promise<void>;
   children: React.ReactNode;
+}
+
+interface FormContextValue {
+  handleSubmit: () => void;
+  methods: UseFormReturn<any>;
+}
+
+const FormContext = createContext<FormContextValue | null>(null);
+
+export function useFormContext() {
+  const context = useContext(FormContext);
+  if (!context) {
+    throw new Error('useFormContext must be used within a FormProvider');
+  }
+  return context;
 }
 
 export function FormProvider({
@@ -21,13 +37,22 @@ export function FormProvider({
     defaultValues,
   });
 
-  const handleSubmit = methods.handleSubmit(onSubmit);
+  const handleSubmit = () => {
+    methods.handleSubmit(onSubmit)();
+  };
+
+  const contextValue: FormContextValue = {
+    handleSubmit,
+    methods,
+  };
 
   return (
     <RHFFormProvider {...methods}>
-      <form onSubmit={handleSubmit}>
-        {children}
-      </form>
+      <FormContext.Provider value={contextValue}>
+        <View>
+          {children}
+        </View>
+      </FormContext.Provider>
     </RHFFormProvider>
   );
 }
