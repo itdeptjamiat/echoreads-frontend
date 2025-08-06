@@ -63,7 +63,7 @@ interface CCardProps extends TouchableOpacityProps {
   borderColor?: string;
 }
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+// Remove AnimatedTouchableOpacity to prevent hook violations
 
 export function CCard({
   children,
@@ -218,7 +218,7 @@ export function CCard({
 
   const cardStyles = getCardStyles();
 
-  const CardComponent = pressable ? AnimatedTouchableOpacity : View;
+  const CardComponent = pressable ? TouchableOpacity : View;
   const cardProps = pressable ? {
     onPress: handlePress,
     activeOpacity: 0.9,

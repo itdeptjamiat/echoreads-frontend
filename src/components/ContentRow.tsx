@@ -26,8 +26,89 @@ const CARD_WIDTH = wp(72); // Slightly wider for better content display
 const CARD_SPACING = Spacing.md; // Use spacing constant
 const CARD_HEIGHT = hp(22); // Fixed height for consistency
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
-const AnimatedCView = Animated.createAnimatedComponent(CView);
+// Remove AnimatedTouchableOpacity to prevent hook violations
+const AnimatedView = Animated.View;
+
+// Dedicated component for animated post items to fix hook violations
+const AnimatedPostItem = React.memo(({ 
+  item, 
+  index, 
+  onPress, 
+  variant = 'default',
+  colors 
+}: { 
+  item: Post; 
+  index: number; 
+  onPress: (item: Post) => void;
+  variant?: 'default' | 'compact';
+  colors: any;
+}) => {
+  const scaleValue = useSharedValue(1);
+  
+  const animatedCardStyle = useAnimatedStyle(() => {
+    const scale = interpolate(
+      scaleValue.value,
+      [0.96, 1],
+      [0.96, 1],
+      'clamp'
+    );
+    
+    return {
+      transform: [{ scale }],
+    };
+  });
+
+  const handlePress = useCallback(() => {
+    scaleValue.value = withSpring(0.96, {
+      damping: 15,
+      stiffness: 200,
+    }, () => {
+      scaleValue.value = withSpring(1, {
+        damping: 12,
+        stiffness: 150,
+      });
+    });
+    
+    setTimeout(() => onPress(item), Duration.fast);
+  }, [item, onPress, scaleValue]);
+
+  return (
+    <AnimatedView
+      entering={FadeInRight.delay(index * 120).duration(700).easing(Easing.out(Easing.back(1.1)))}
+      style={[animatedCardStyle, { width: CARD_WIDTH }]}
+    >
+      <TouchableOpacity
+        onPress={handlePress}
+        accessible={true}
+        accessibilityRole="button"
+        accessibilityLabel={`${item.title}`}
+        accessibilityHint={`By ${item.author || 'Unknown author'}. ${item.readTime || 'Reading time unknown'}. Double tap to read full content`}
+        testID={`content-item-${item.id}`}
+      >
+        <CView
+          borderRadius="xl"
+          style={{
+            ...Shadow.md,
+            backgroundColor: colors.card,
+            height: variant === 'compact' ? CARD_HEIGHT * 0.9 : CARD_HEIGHT,
+            overflow: 'hidden',
+          }}
+        >
+          <PostCard
+            title={item.title}
+            description={item.description}
+            imageUrl={item.imageUrl}
+            category={item.category as any}
+            readTime={item.readTime}
+            author={item.author}
+            variant={variant === 'compact' ? 'default' : 'default'}
+            onPress={handlePress}
+          />
+        </CView>
+      </TouchableOpacity>
+    </AnimatedView>
+  );
+});
 
 interface ContentRowProps {
   title: string;
@@ -56,7 +137,6 @@ export function ContentRow({
   const { colors } = useTheme();
 
   // Enhanced animation values
-  const scaleValue = useSharedValue(1);
   const headerOpacity = useSharedValue(0);
   const contentOpacity = useSharedValue(0);
   
@@ -73,88 +153,34 @@ export function ContentRow({
     });
   }, []);
 
-  // Enhanced item press with premium animation
+  // Enhanced item press handler
   const handleItemPress = useCallback((item: Post) => {
-    scaleValue.value = withSpring(0.96, {
-      damping: 15,
-      stiffness: 200,
-    }, () => {
-      scaleValue.value = withSpring(1, {
-        damping: 12,
-        stiffness: 150,
-      });
-    });
-    
-    const callback = () => {
-      if (onPressItem) {
-        onPressItem(item);
-      } else {
-        console.log('Navigate to post:', item.id);
-      }
-    };
-    
-    setTimeout(callback, Duration.fast);
-  }, [onPressItem, scaleValue]);
+    if (onPressItem) {
+      onPressItem(item);
+    } else {
+      console.log('Navigate to post:', item.id);
+    }
+  }, [onPressItem]);
 
-  // Enhanced post item rendering with premium animations
+  // Simplified post item rendering using dedicated component
   const renderPostItem: ListRenderItem<Post> = useCallback(({ item, index }) => {
-    const animatedCardStyle = useAnimatedStyle(() => {
-      const scale = interpolate(
-        scaleValue.value,
-        [0.96, 1],
-        [0.96, 1],
-        'clamp'
-      );
-      
-      return {
-        transform: [{ scale }],
-      };
-    });
-
     return (
-      <AnimatedCView
-        entering={FadeInRight.delay(index * 120).duration(700).easing(Easing.out(Easing.back(1.1)))}
-        style={[animatedCardStyle, { width: CARD_WIDTH }]}
-      >
-        <AnimatedTouchableOpacity
-          onPress={() => handleItemPress(item)}
-          accessible={true}
-          accessibilityRole="button"
-          accessibilityLabel={`${item.title}`}
-          accessibilityHint={`By ${item.author || 'Unknown author'}. ${item.readTime || 'Reading time unknown'}. Double tap to read full content`}
-          testID={`content-item-${item.id}`}
-        >
-          <CView
-            borderRadius="xl"
-            style={{
-              ...Shadow.md,
-              backgroundColor: colors.card,
-              height: variant === 'compact' ? CARD_HEIGHT * 0.9 : CARD_HEIGHT,
-              overflow: 'hidden',
-            }}
-          >
-            <PostCard
-              title={item.title}
-              description={item.description}
-              imageUrl={item.imageUrl}
-              category={item.category as any}
-              readTime={item.readTime}
-              author={item.author}
-              variant={variant === 'compact' ? 'default' : 'default'}
-              onPress={() => handleItemPress(item)}
-            />
-          </CView>
-        </AnimatedTouchableOpacity>
-      </AnimatedCView>
+      <AnimatedPostItem
+        item={item}
+        index={index}
+        onPress={handleItemPress}
+        variant={variant}
+        colors={colors}
+      />
     );
-  }, [handleItemPress, scaleValue, variant, colors.card]);
+  }, [handleItemPress, variant, colors]);
 
   // Enhanced loading skeleton with staggered animations
   const renderLoadingSkeleton = useCallback(() => {
     return (
       <CView row>
         {[1, 2, 3].map((i) => (
-          <AnimatedCView
+          <AnimatedView
             key={i}
             entering={FadeInRight.delay(i * 150).duration(500)}
             style={{
@@ -227,7 +253,7 @@ export function ContentRow({
                 </CView>
               </CView>
             </CView>
-          </AnimatedCView>
+          </AnimatedView>
         ))}
       </CView>
     );
@@ -253,7 +279,7 @@ export function ContentRow({
     if (!error) return null;
 
     return (
-      <AnimatedCView
+      <AnimatedView
         entering={FadeInDown.duration(600).easing(Easing.out(Easing.quad))}
       >
         <CView 
@@ -334,7 +360,7 @@ export function ContentRow({
             </CView>
           </TouchableOpacity>
         </CView>
-      </AnimatedCView>
+      </AnimatedView>
     );
   }, [error, title, colors.danger]);
 

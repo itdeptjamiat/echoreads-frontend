@@ -27,12 +27,12 @@ export default function OnboardingLayout() {
     }
   }, [onboardingCompleted, authData?.user?._id, dispatch]);
 
+  // Handle navigation based on next step
   useEffect(() => {
-    // Handle navigation based on next step
     if (nextStep && !onboardingCompleted) {
       switch (nextStep) {
         case 'intro':
-          router.replace('/(onboarding)/');
+          router.replace('/(onboarding)/intro');
           break;
         case 'plan-selection':
           router.replace('/(onboarding)/choosePlan');

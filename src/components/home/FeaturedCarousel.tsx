@@ -30,7 +30,7 @@ const CARD_WIDTH = wp(85);
 const CARD_SPACING = Spacing.md;
 const CARD_HEIGHT = hp(28);
 
-const AnimatedCView = Animated.createAnimatedComponent(CView);
+const AnimatedView = Animated.View;
 
 export function FeaturedCarousel() {
   const { colors } = useTheme();
@@ -84,7 +84,7 @@ export function FeaturedCarousel() {
 
   const renderFeaturedItem: ListRenderItem<Post> = useCallback(({ item, index }) => {
     return (
-      <AnimatedCView
+      <AnimatedView
         key={item.id}
         entering={ZoomIn.delay(index * 200).duration(600).easing(Easing.out(Easing.back(1.1)))}
         style={{ 
@@ -166,7 +166,7 @@ export function FeaturedCarousel() {
             />
           </CView>
         </TouchableOpacity>
-      </AnimatedCView>
+      </AnimatedView>
     );
   }, [activePostType, featured.length, getFeaturedGradient, handleCardPress, colors.card]);
 
@@ -178,7 +178,7 @@ export function FeaturedCarousel() {
         style={{ gap: Spacing.md }}
       >
         {[1, 2, 3].map((index) => (
-          <AnimatedCView
+          <AnimatedView
             key={index}
             entering={FadeInLeft.delay(index * 200).duration(600).easing(Easing.out(Easing.quad))}
             style={{

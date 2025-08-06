@@ -80,13 +80,13 @@ export default function IntroScreen() {
   const handleSkip = () => {
     dispatch(markIntroSeen());
     dispatch(completeIntro());
-    router.push('/(auth)/');
+    router.push('/(onboarding)/choosePlan');
   };
 
   const handleGetStarted = () => {
     dispatch(markIntroSeen());
     dispatch(completeIntro());
-    router.push('/(auth)/');
+    router.push('/(onboarding)/choosePlan');
   };
 
   const renderSlide = ({ item, index }: { item: IntroSlide; index: number }) => {
@@ -94,7 +94,7 @@ export default function IntroScreen() {
       <CView 
         width={screenWidth}
         height={screenHeight}
-        position="relative"
+        style={{ position: 'relative' }}
       >
         <LinearGradient
           colors={item.gradient}
@@ -134,7 +134,7 @@ export default function IntroScreen() {
           </Animated.View>
           
           <Animated.View entering={SlideInLeft.delay(400).springify()}>
-            <CView center maxWidth={320}>
+            <CView center style={{ maxWidth: 320 }}>
               <CText 
                 variant="h1" 
                 bold 
@@ -217,15 +217,17 @@ export default function IntroScreen() {
         scrollEventThrottle={16}
       />
       
-      <CView 
-        position="absolute"
-        bottom={0}
-        left={0}
-        right={0}
-        px="xl"
-        pb="xl"
-        bg="background"
-      >
+              <CView 
+          style={{ 
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+          }}
+          px="xl"
+          pb="xl"
+          bg="background"
+        >
         <Animated.View entering={FadeInUp.delay(600).springify()}>
           {renderDots()}
           

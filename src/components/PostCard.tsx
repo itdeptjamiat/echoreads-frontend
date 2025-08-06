@@ -23,7 +23,7 @@ interface PostCardProps {
   variant?: 'default' | 'featured';
 }
 
-const AnimatedCView = Animated.createAnimatedComponent(CView);
+// Remove AnimatedCView to prevent layout animation conflicts
 
 export function PostCard({ 
   title, 
@@ -102,13 +102,13 @@ export function PostCard({
   };
 
   return (
-    <AnimatedCView
-      {...getCardStyle()}
-      style={animatedStyle}
-      onPress={handlePress}
-      pressable
-      accessibilityLabel={`${category} post: ${title}`}
-    >
+    <Animated.View style={animatedStyle}>
+      <CView
+        {...getCardStyle()}
+        onPress={handlePress}
+        pressable
+        accessibilityLabel={`${category} post: ${title}`}
+      >
       {imageUrl && (
         <CView 
           height={variant === 'featured' ? 140 : 80}
@@ -216,7 +216,8 @@ export function PostCard({
             </CText>
           )}
         </CView>
+              </CView>
       </CView>
-    </AnimatedCView>
-  );
+    </Animated.View>
+    );
 }

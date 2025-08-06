@@ -1,24 +1,56 @@
-import { Stack } from 'expo-router';
-import { ThemeProvider } from '../src/theme/ThemeContext';
-import { Provider } from 'react-redux';
-import { PersistGate } from 'redux-persist/integration/react';
+import React, { useEffect } from 'react';
+import { Stack, useRouter } from 'expo-router';
+import { Provider, useSelector, useDispatch } from 'react-redux';
 import { store, persistor } from '../src/redux/store';
+import { ThemeProvider } from '../src/theme/ThemeContext';
+import { PersistGate } from 'redux-persist/integration/react';
+import { selectToken } from '../src/redux/slices/selectState';
+import { attachAuthToken } from '../src/axios/EchoInstance';
 
-// Inner component to access Redux state after Provider
-function AppContent() {
-  return (
-    <Stack screenOptions={{ headerShown: false }} />
-  );
-}
-
-export default function Layout() {
+const AppLayout = () => {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
         <ThemeProvider>
-          <AppContent />
+          <Navigation />
         </ThemeProvider>
       </PersistGate>
     </Provider>
   );
-}
+};
+
+const Navigation = () => {
+  const token = useSelector(selectToken);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handleAuthToken = async () => {
+      try {
+        if (token) {
+          attachAuthToken(token);
+          console.log('🔐 Token found, navigating to main app');
+          router.replace('/(tabs)/');
+        } else {
+          attachAuthToken(null);
+          console.log('⚠️ No token found, navigating to onboarding');
+          router.replace('/(onboarding)/intro');
+        }
+      } catch (error) {
+        console.error('Error handling auth token:', error);
+      }
+    };
+
+    handleAuthToken();
+  }, [token, router]);
+
+  return (
+    <Stack screenOptions={{ headerShown: false }}>
+      <Stack.Screen name="index" />
+      <Stack.Screen name="(auth)" />
+      <Stack.Screen name="(onboarding)" />
+      <Stack.Screen name="(tabs)" />
+    </Stack>
+  );
+};
+
+export default AppLayout;

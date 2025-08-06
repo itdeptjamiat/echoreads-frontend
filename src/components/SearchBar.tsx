@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { TextInput } from 'react-native';
+import { TextInput, TouchableOpacity } from 'react-native';
 import { CView, CInput, CIcon } from './core';
 import { Spacing, Radius } from '../constants/layout';
 import { useTheme } from '../hooks/useTheme';
@@ -21,7 +21,7 @@ interface SearchBarProps {
   onFilterPress?: () => void;
 }
 
-const AnimatedCView = Animated.createAnimatedComponent(CView);
+// Remove AnimatedCView to prevent layout animation conflicts
 
 export function SearchBar({ 
   placeholder = "Search magazines, articles, digests...", 
@@ -81,23 +81,24 @@ export function SearchBar({
       my="md"
       style={{ gap: Spacing.md }}
     >
-      <AnimatedCView 
-        flex={1}
-        row
-        align="center"
-        bg="card"
-        borderRadius="lg"
-        px="md"
-        py="sm"
-        shadow="sm"
-        style={animatedContainerStyle}
-      >
-        <CIcon 
-          name="search" 
-          size={5} 
-          color={isFocused ? "primary" : "textSecondary"}
-          mr="md"
-        />
+      <Animated.View style={animatedContainerStyle}>
+        <CView 
+          flex={1}
+          row
+          align="center"
+          bg="card"
+          borderRadius="lg"
+          px="md"
+          py="sm"
+          shadow="sm"
+        >
+        <CView mr="md">
+          <CIcon 
+            name="search" 
+            size={5} 
+            color={isFocused ? "primary" : "textSecondary"}
+          />
+        </CView>
         
         <TextInput
           style={{
@@ -121,38 +122,46 @@ export function SearchBar({
         />
         
         {value.length > 0 && (
-          <CIcon 
-            name="close-circle" 
-            size={5} 
-            color="textSecondary"
-            onPress={() => onChangeText('')}
-            pressable
-            ml="sm"
-            accessibilityLabel="Clear search"
-          />
+          <CView ml="sm">
+            <CIcon 
+              name="close-circle" 
+              size={5} 
+              color="textSecondary"
+              onPress={() => onChangeText('')}
+              pressable
+              accessibilityLabel="Clear search"
+            />
+          </CView>
         )}
-      </AnimatedCView>
+        </CView>
+      </Animated.View>
       
       {showFilter && (
-        <AnimatedCView 
-          bg="card"
-          borderRadius="md"
-          p="md"
-          borderWidth={1}
-          borderColor="border"
-          shadow="sm"
-          style={animatedFilterStyle}
-          onPress={handleFilterPress}
-          pressable
-          accessibilityLabel="Filter button"
-        >
-          <CIcon 
-            name="options" 
-            size={5} 
-            color="primary"
-          />
-        </AnimatedCView>
-      )}
+        <Animated.View style={animatedFilterStyle}>
+                   <TouchableOpacity
+           onPress={handleFilterPress}
+           accessibilityLabel="Filter button"
+           style={{
+             backgroundColor: colors.card,
+             borderRadius: 8,
+             padding: 16,
+             borderWidth: 1,
+             borderColor: colors.border,
+             shadowColor: colors.shadow,
+             shadowOffset: { width: 0, height: 2 },
+             shadowOpacity: 0.1,
+             shadowRadius: 4,
+             elevation: 2,
+           }}
+         >
+                     <CIcon 
+             name="options" 
+             size={5} 
+             color="primary"
+           />
+         </TouchableOpacity>
+       </Animated.View>
+       )}
     </CView>
   );
 }

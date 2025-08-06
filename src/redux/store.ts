@@ -15,10 +15,10 @@ import digestsReducer from './slices/digestsSlice';
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth', 'onboarding'], // Persist auth and onboarding state
+  whitelist: ['auth'], // Persist auth and onboarding state
 };  
 
-// Combine reducers
+// Combine reducersms
 const rootReducer = combineReducers({
   auth: authReducer,
   orders: ordersReducer,

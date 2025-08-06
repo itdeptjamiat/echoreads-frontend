@@ -50,7 +50,7 @@ interface CButtonProps extends TouchableOpacityProps {
   rightIcon?: React.ReactNode;
 }
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+// Remove AnimatedTouchableOpacity to prevent hook violations
 
 export function CButton({
   children,
@@ -253,7 +253,7 @@ export function CButton({
   };
 
   return (
-    <AnimatedTouchableOpacity
+    <TouchableOpacity
       style={[buttonStyles, style, animatedStyle]}
       onPress={handlePress}
       disabled={disabled || loading}
@@ -269,6 +269,6 @@ export function CButton({
         />
       )}
       {renderContent()}
-    </AnimatedTouchableOpacity>
+    </TouchableOpacity>
   );
 }
