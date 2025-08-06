@@ -24,7 +24,7 @@ const Page = () => {
     };
     handleNavigation();
 
-  }, [token]); // Remove token dependency to prevent re-runs
+  }, []); // Run only once on mount to prevent infinite loops
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

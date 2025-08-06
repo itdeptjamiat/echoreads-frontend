@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { TextInput } from 'react-native';
+import { CView, CInput, CIcon } from './core';
+import { Spacing, Radius } from '../constants/layout';
 import { useTheme } from '../hooks/useTheme';
 import Animated, { 
   useAnimatedStyle, 
@@ -20,8 +21,7 @@ interface SearchBarProps {
   onFilterPress?: () => void;
 }
 
-const AnimatedView = Animated.createAnimatedComponent(View);
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedCView = Animated.createAnimatedComponent(CView);
 
 export function SearchBar({ 
   placeholder = "Search magazines, articles, digests...", 
@@ -73,66 +73,39 @@ export function SearchBar({
     onFilterPress?.();
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginHorizontal: 20,
-      marginVertical: 16,
-      gap: 12,
-    },
-    searchContainer: {
-      flex: 1,
-      flexDirection: 'row',
-      alignItems: 'center',
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      paddingHorizontal: 16,
-      paddingVertical: 12,
-      elevation: 2,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    searchIcon: {
-      marginRight: 12,
-    },
-    input: {
-      flex: 1,
-      fontSize: 16,
-      color: colors.text,
-      fontFamily: 'System',
-    },
-    clearButton: {
-      padding: 4,
-      marginLeft: 8,
-    },
-    filterButton: {
-      backgroundColor: colors.card,
-      borderRadius: 12,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      elevation: 2,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-  });
-
   return (
-    <View style={styles.container}>
-      <AnimatedView style={[styles.searchContainer, animatedContainerStyle]}>
-        <Ionicons 
+    <CView 
+      row 
+      align="center" 
+      mx="lg" 
+      my="md"
+      style={{ gap: Spacing.md }}
+    >
+      <AnimatedCView 
+        flex={1}
+        row
+        align="center"
+        bg="card"
+        borderRadius="lg"
+        px="md"
+        py="sm"
+        shadow="sm"
+        style={animatedContainerStyle}
+      >
+        <CIcon 
           name="search" 
-          size={20} 
-          color={isFocused ? colors.primary : colors.textSecondary}
-          style={styles.searchIcon}
+          size={5} 
+          color={isFocused ? "primary" : "textSecondary"}
+          mr="md"
         />
+        
         <TextInput
-          style={styles.input}
+          style={{
+            flex: 1,
+            fontSize: 16,
+            color: colors.text,
+            fontFamily: 'System',
+          }}
           placeholder={placeholder}
           placeholderTextColor={colors.textSecondary}
           value={value}
@@ -146,36 +119,40 @@ export function SearchBar({
           accessibilityLabel="Search input"
           accessible={true}
         />
+        
         {value.length > 0 && (
-          <TouchableOpacity 
-            style={styles.clearButton}
+          <CIcon 
+            name="close-circle" 
+            size={5} 
+            color="textSecondary"
             onPress={() => onChangeText('')}
+            pressable
+            ml="sm"
             accessibilityLabel="Clear search"
-            accessible={true}
-          >
-            <Ionicons 
-              name="close-circle" 
-              size={20} 
-              color={colors.textSecondary}
-            />
-          </TouchableOpacity>
+          />
         )}
-      </AnimatedView>
+      </AnimatedCView>
       
       {showFilter && (
-        <AnimatedTouchableOpacity 
-          style={[styles.filterButton, animatedFilterStyle]}
+        <AnimatedCView 
+          bg="card"
+          borderRadius="md"
+          p="md"
+          borderWidth={1}
+          borderColor="border"
+          shadow="sm"
+          style={animatedFilterStyle}
           onPress={handleFilterPress}
+          pressable
           accessibilityLabel="Filter button"
-          accessible={true}
         >
-          <Ionicons 
+          <CIcon 
             name="options" 
-            size={20} 
-            color={colors.primary}
+            size={5} 
+            color="primary"
           />
-        </AnimatedTouchableOpacity>
+        </AnimatedCView>
       )}
-    </View>
+    </CView>
   );
 }

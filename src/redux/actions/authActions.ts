@@ -37,15 +37,26 @@ export const loginUser = createAsyncThunk(
   async (credentials: LoginCredentials, { rejectWithValue }) => {
     try {
       const response = await APIIns.post(API_URLS.auth.login, credentials);
-      console.log('response', response.data);
-      // Attach token to Axios headers (auth state persisted via redux-persist)
-      if (response.data.token) {
-        attachAuthToken(response.data.token);
+      console.log('Login response:', response.data);
+      
+      // Handle the actual response structure
+      const responseData = response.data;
+      
+      // Extract token and user data from the nested structure
+      const token = responseData.user?.token || responseData.token;
+      const userData = responseData.user?.user || responseData.user;
+      
+      // Attach token to Axios headers
+      if (token) {
+        attachAuthToken(token);
       }
       
-      
       console.log('Success: Login successful!');
-      return response.data;
+      return {
+        token,
+        user: userData,
+        message: responseData.message
+      };
     } catch (error: any) {
       const message = error?.response?.data?.message || 'Something went wrong';
       console.error('Error:', message);

@@ -1,5 +1,5 @@
 import React, { createContext, useContext } from 'react';
-import { View } from 'react-native';
+import { CView } from '../components/core';
 import { FormProvider as RHFFormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -49,9 +49,9 @@ export function FormProvider({
   return (
     <RHFFormProvider {...methods}>
       <FormContext.Provider value={contextValue}>
-        <View>
+        <CView>
           {children}
-        </View>
+        </CView>
       </FormContext.Provider>
     </RHFFormProvider>
   );

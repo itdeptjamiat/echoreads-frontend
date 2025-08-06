@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Alert, TouchableOpacity } from 'react-native';
+import { Alert } from 'react-native';
+import { CView, CText, CButton, CIcon, CScrollView } from '../../src/components/core';
+import { Spacing, Radius, Shadow } from '../../src/constants/layout';
 import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
 import { FormProvider, TextField, useFormContext } from '../../src/form';
-import { CustomButton } from '../../src/components/CustomButton';
+import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { resetPasswordSchema, ResetPasswordFormData } from '../../src/form/schemas/authSchema';
 import { useDispatch } from 'react-redux';
 import { resetPassword } from '../../src/redux/actions/authActions';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import Animated, { 
+  FadeInDown, 
+  FadeInUp 
+} from 'react-native-reanimated';
 
 export default function ResetPasswordScreen() {
   const { colors } = useTheme();
@@ -16,6 +20,7 @@ export default function ResetPasswordScreen() {
   const dispatch = useDispatch();
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  
   // Update handleSubmit to map data
   const handleSubmit = async (data) => {
     try {
@@ -33,104 +38,164 @@ export default function ResetPasswordScreen() {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    scrollContent: {
-      flexGrow: 1,
-      padding: 24,
-      justifyContent: 'center',
-    },
-    title: {
-      marginBottom: 32,
-    },
-    subtitle: {
-      marginBottom: 32,
-      textAlign: 'center',
-    },
-    formContainer: {
-      marginBottom: 24,
-    },
-    buttonContainer: {
-      marginTop: 16,
-    },
-  });
-
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <ScreenWrapper
+      safeArea={true}
+      keyboardAvoiding={true}
     >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+      <CScrollView 
+        px="lg"
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <H1 center b style={styles.title}>
-          Reset Password
-        </H1>
-        
-        <Body center style={styles.subtitle}>
-          Enter your new password below
-        </Body>
+        <CView center flex={1} py="xxl">
+          {/* Header Section */}
+          <Animated.View entering={FadeInDown.delay(200).springify()}>
+            <CView center mb="xl">
+              <CView 
+                width={80}
+                height={80}
+                borderRadius="full"
+                bg="card"
+                center
+                shadow="lg"
+                mb="lg"
+              >
+                <CIcon 
+                  name="key-outline" 
+                  size={8} 
+                  color="primary"
+                />
+              </CView>
+              
+              <CText 
+                variant="h1" 
+                bold 
+                center
+                mb="md"
+              >
+                Reset Password
+              </CText>
+              
+              <CText 
+                variant="bodyLarge" 
+                color="textSecondary"
+                center
+                lines={2}
+              >
+                Enter your new password below
+              </CText>
+            </CView>
+          </Animated.View>
 
-        <View style={styles.formContainer}>
-          <FormProvider
-            schema={resetPasswordSchema}
-            defaultValues={{
-              newPassword: '',
-              confirmNewPassword: '',
-            }}
-            onSubmit={handleSubmit}
-          >
-            <TextField
-              name="newPassword"
-              placeholder="New Password"
-              secureTextEntry={!showNewPassword}
-              rightIcon={(
-                <TouchableOpacity onPress={() => setShowNewPassword(!showNewPassword)}>
-                  <Ionicons name={showNewPassword ? 'eye-off' : 'eye'} size={24} color={colors.textSecondary} />
-                </TouchableOpacity>
-              )}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="new-password"
-            />
+          {/* Form Section */}
+          <Animated.View entering={FadeInUp.delay(400).springify()}>
+            <CView 
+              bg="card" 
+              p="xl" 
+              borderRadius="xl"
+              shadow="lg"
+              mb="lg"
+            >
+              <FormProvider
+                schema={resetPasswordSchema}
+                defaultValues={{
+                  newPassword: '',
+                  confirmNewPassword: '',
+                }}
+                onSubmit={handleSubmit}
+              >
+                <CView>
+                  <FormFields
+                    showNewPassword={showNewPassword}
+                    setShowNewPassword={setShowNewPassword}
+                    showConfirmPassword={showConfirmPassword}
+                    setShowConfirmPassword={setShowConfirmPassword}
+                  />
 
-            <TextField
-              name="confirmNewPassword"
-              placeholder="Confirm New Password"
-              secureTextEntry={!showConfirmPassword}
-              rightIcon={(
-                <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                  <Ionicons name={showConfirmPassword ? 'eye-off' : 'eye'} size={24} color={colors.textSecondary} />
-                </TouchableOpacity>
-              )}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="new-password"
-            />
+                  <CView mt="lg">
+                    <SubmitButton />
+                  </CView>
+                </CView>
+              </FormProvider>
+            </CView>
+          </Animated.View>
 
-            <View style={styles.buttonContainer}>
-              <SubmitButton />
-            </View>
-          </FormProvider>
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+          {/* Footer Section */}
+          <Animated.View entering={FadeInUp.delay(600).springify()}>
+            <CView center>
+              <CButton
+                title="Back to Sign In"
+                variant="ghost"
+                onPress={() => router.push('/(auth)/')}
+                accessibilityLabel="Back to sign in"
+              />
+            </CView>
+          </Animated.View>
+        </CView>
+      </CScrollView>
+    </ScreenWrapper>
   );
 } 
+
+function FormFields({
+  showNewPassword,
+  setShowNewPassword,
+  showConfirmPassword,
+  setShowConfirmPassword,
+}: {
+  showNewPassword: boolean;
+  setShowNewPassword: (show: boolean) => void;
+  showConfirmPassword: boolean;
+  setShowConfirmPassword: (show: boolean) => void;
+}) {
+  const { methods } = useFormContext();
+
+  return (
+    <CView>
+      <TextField
+        name="newPassword"
+        control={methods.control}
+        label="New Password"
+        placeholder="Enter your new password"
+        secureTextEntry={!showNewPassword}
+        leftIcon="lock-closed"
+        rightIcon={showNewPassword ? 'eye-off' : 'eye'}
+        onRightIconPress={() => setShowNewPassword(!showNewPassword)}
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="new-password"
+        required
+      />
+
+      <TextField
+        name="confirmNewPassword"
+        control={methods.control}
+        label="Confirm New Password"
+        placeholder="Confirm your new password"
+        secureTextEntry={!showConfirmPassword}
+        leftIcon="shield-checkmark"
+        rightIcon={showConfirmPassword ? 'eye-off' : 'eye'}
+        onRightIconPress={() => setShowConfirmPassword(!showConfirmPassword)}
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="new-password"
+        required
+      />
+    </CView>
+  );
+}
 
 function SubmitButton() {
   const { handleSubmit } = useFormContext();
   return (
-    <CustomButton
-      label="Reset Password"
+    <CButton
+      title="Reset Password"
+      variant="gradient"
       onPress={handleSubmit}
+      size="large"
+      fullWidth
       accessibilityLabel="Reset password button"
-      accessible={true}
     />
   );
 } 

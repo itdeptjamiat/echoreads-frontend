@@ -1,13 +1,18 @@
 import React from 'react';
-import { View, ScrollView, StyleSheet, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { Alert } from 'react-native';
+import { CView, CText, CButton, CIcon, CScrollView } from '../../src/components/core';
+import { Spacing, Radius, Shadow } from '../../src/constants/layout';
 import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
 import { FormProvider, TextField, useFormContext } from '../../src/form';
-import { CustomButton } from '../../src/components/CustomButton';
+import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { forgotPasswordSchema, ForgotPasswordFormData } from '../../src/form/schemas/authSchema';
 import { useDispatch } from 'react-redux';
 import { forgotPassword } from '../../src/redux/actions/authActions';
 import { router } from 'expo-router';
+import Animated, { 
+  FadeInDown, 
+  FadeInUp 
+} from 'react-native-reanimated';
 
 export default function ForgotPasswordScreen() {
   const { colors } = useTheme();
@@ -23,97 +28,131 @@ export default function ForgotPasswordScreen() {
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    scrollContent: {
-      flexGrow: 1,
-      padding: 24,
-      justifyContent: 'center',
-    },
-    title: {
-      marginBottom: 32,
-    },
-    subtitle: {
-      marginBottom: 32,
-      textAlign: 'center',
-    },
-    formContainer: {
-      marginBottom: 24,
-    },
-    buttonContainer: {
-      marginTop: 16,
-    },
-    footerContainer: {
-      marginTop: 24,
-      alignItems: 'center',
-    },
-  });
-
   return (
-    <KeyboardAvoidingView 
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <ScreenWrapper
+      safeArea={true}
+      keyboardAvoiding={true}
     >
-      <ScrollView 
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
+      <CScrollView 
+        px="lg"
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <H1 center b style={styles.title}>
-          Forgot Password
-        </H1>
-        
-        <Body center style={styles.subtitle}>
-          Enter your email address and we'll send you a link to reset your password
-        </Body>
+        <CView center flex={1} py="xxl">
+          {/* Header Section */}
+          <Animated.View entering={FadeInDown.delay(200).springify()}>
+            <CView center mb="xl">
+              <CView 
+                width={80}
+                height={80}
+                borderRadius="full"
+                bg="card"
+                center
+                shadow="lg"
+                mb="lg"
+              >
+                <CIcon 
+                  name="mail-unread-outline" 
+                  size={8} 
+                  color="primary"
+                />
+              </CView>
+              
+              <CText 
+                variant="h1" 
+                bold 
+                center
+                mb="md"
+              >
+                Forgot Password
+              </CText>
+              
+              <CText 
+                variant="bodyLarge" 
+                color="textSecondary"
+                center
+                lines={3}
+              >
+                Enter your email address and we'll send you a link to reset your password
+              </CText>
+            </CView>
+          </Animated.View>
 
-        <View style={styles.formContainer}>
-          <FormProvider
-            schema={forgotPasswordSchema}
-            defaultValues={{
-              email: '',
-            }}
-            onSubmit={handleSubmit}
-          >
-            <TextField
-              name="email"
-              placeholder="Email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-            />
+          {/* Form Section */}
+          <Animated.View entering={FadeInUp.delay(400).springify()}>
+            <CView 
+              bg="card" 
+              p="xl" 
+              borderRadius="xl"
+              shadow="lg"
+              mb="lg"
+            >
+              <FormProvider
+                schema={forgotPasswordSchema}
+                defaultValues={{
+                  email: '',
+                }}
+                onSubmit={handleSubmit}
+              >
+                <CView>
+                  <FormFields />
 
-            <View style={styles.buttonContainer}>
-              <SubmitButton />
-            </View>
-          </FormProvider>
-        </View>
-        <View style={styles.footerContainer}>
-          <CustomButton
-            label="Back to Sign In"
-            variant="ghost"
-            onPress={() => router.push('/(auth)/')}
-            accessibilityLabel="Back to sign in"
-            accessible={true}
-          />
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
+                  <CView mt="lg">
+                    <SubmitButton />
+                  </CView>
+                </CView>
+              </FormProvider>
+            </CView>
+          </Animated.View>
+
+          {/* Footer Section */}
+          <Animated.View entering={FadeInUp.delay(600).springify()}>
+            <CView center>
+              <CButton
+                title="Back to Sign In"
+                variant="ghost"
+                onPress={() => router.push('/(auth)/')}
+                accessibilityLabel="Back to sign in"
+              />
+            </CView>
+          </Animated.View>
+        </CView>
+      </CScrollView>
+    </ScreenWrapper>
   );
 } 
+
+function FormFields() {
+  const { methods } = useFormContext();
+
+  return (
+    <CView>
+      <TextField
+        name="email"
+        control={methods.control}
+        label="Email"
+        placeholder="Enter your email address"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="email"
+        leftIcon="mail"
+        required
+      />
+    </CView>
+  );
+}
 
 function SubmitButton() {
   const { handleSubmit } = useFormContext();
   return (
-    <CustomButton
-      label="Send Reset Link"
+    <CButton
+      title="Send Reset Link"
+      variant="gradient"
       onPress={handleSubmit}
+      size="large"
+      fullWidth
       accessibilityLabel="Send reset link button"
-      accessible={true}
     />
   );
 } 

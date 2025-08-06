@@ -14,10 +14,16 @@ import { router } from 'expo-router';
 interface AuthData {
   token?: string;
   user?: {
-    id: string;
+    _id: string;
     email: string;
     name?: string;
-    role?: string;
+    username?: string;
+    userType?: string;
+    plan?: string;
+    profilePic?: string;
+    isVerified?: boolean;
+    uid?: number;
+    createdAt?: string;
   };
 }
 
@@ -176,6 +182,9 @@ const authSlice = createSlice({
           user: action.payload.user,
         };
         state.error = null;
+        
+        // Log the stored auth data for debugging
+        console.log('Auth data stored:', state.data);
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;

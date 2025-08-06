@@ -1,35 +1,141 @@
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useEffect, useCallback, useState } from 'react';
+import { Dimensions, Alert, TouchableOpacity, RefreshControl, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { Ionicons } from '@expo/vector-icons';
+import { CView, CText, CButton, CIcon, CScrollView } from '../../src/components/core';
+import { Spacing, Radius, Shadow } from '../../src/constants/layout';
 import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
-import { CustomButton } from '../../src/components/CustomButton';
-import { ButtonSelectorGroup } from '../../src/components/ButtonSelectorGroup';
 import { PostCard } from '../../src/components/PostCard';
+import { ContentRow } from '../../src/components/ContentRow';
 import { ScreenWrapper } from '../../src/components/ScreenWrapper';
-import { getPostsByCategory, getFeaturedPosts } from '../../src/data/demoData';
+import { FeaturedCarousel, CategoryGrid, PostTypeTabs } from '../../src/components/home';
+import { useDispatch, useSelector } from 'react-redux';
+import { AppDispatch } from '../../src/redux/store';
+import { setActivePostType } from '../../src/redux/slices/uiSlice';
+import {
+  selectActivePostType,
+  selectCurrentFeatured,
+  selectCurrentTrending,
+  selectCurrentRecommended,
+  selectCurrentNew,
+  selectCurrentLoading,
+  selectCurrentError,
+} from '../../src/redux/selectors/homeSelectors';
+import {
+  fetchMagazinesFeatured,
+  fetchMagazinesTrending,
+  fetchMagazinesRecommended,
+  fetchMagazinesNew,
+} from '../../src/redux/slices/magazinesSlice';
+import {
+  fetchArticlesFeatured,
+  fetchArticlesTrending,
+  fetchArticlesRecommended,
+  fetchArticlesNew,
+} from '../../src/redux/slices/articlesSlice';
+import {
+  fetchDigestsFeatured,
+  fetchDigestsTrending,
+  fetchDigestsRecommended,
+  fetchDigestsNew,
+} from '../../src/redux/slices/digestsSlice';
 import Animated, { 
   useAnimatedScrollHandler, 
   useSharedValue, 
   useAnimatedStyle,
   interpolate,
   FadeInDown,
-  FadeInUp 
 } from 'react-native-reanimated';
 
 const AnimatedScrollView = Animated.createAnimatedComponent(ScrollView);
 
 export default function HomeScreen() {
+  const dispatch = useDispatch<AppDispatch>();
   const { colors, theme, toggleTheme } = useTheme();
-  const [selectedCategory, setSelectedCategory] = useState<'magazines' | 'articles' | 'digests'>('magazines');
   const scrollY = useSharedValue(0);
 
-  const featuredPosts = getFeaturedPosts();
-  const categoryPosts = getPostsByCategory(
-    selectedCategory === 'magazines' ? 'magazine' : 
-    selectedCategory === 'articles' ? 'article' : 'digest'
-  );
+  // Redux selectors
+  const activePostType = useSelector(selectActivePostType);
+  const featured = useSelector(selectCurrentFeatured);
+  const trending = useSelector(selectCurrentTrending);
+  const recommended = useSelector(selectCurrentRecommended);
+  const newContent = useSelector(selectCurrentNew);
+  const loading = useSelector(selectCurrentLoading);
+  const error = useSelector(selectCurrentError);
+
+  // Pull to refresh state
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Fetch data when component mounts or post type changes
+  useEffect(() => {
+    fetchDataForPostType(activePostType);
+  }, [activePostType]);
+
+  const fetchDataForPostType = useCallback((postType: string) => {
+    switch (postType) {
+      case 'magazines':
+        dispatch(fetchMagazinesFeatured());
+        dispatch(fetchMagazinesTrending());
+        dispatch(fetchMagazinesRecommended());
+        dispatch(fetchMagazinesNew());
+        break;
+      case 'articles':
+        dispatch(fetchArticlesFeatured());
+        dispatch(fetchArticlesTrending());
+        dispatch(fetchArticlesRecommended());
+        dispatch(fetchArticlesNew());
+        break;
+      case 'digests':
+        dispatch(fetchDigestsFeatured());
+        dispatch(fetchDigestsTrending());
+        dispatch(fetchDigestsRecommended());
+        dispatch(fetchDigestsNew());
+        break;
+    }
+  }, [dispatch]);
+
+  const handlePostTypeChange = useCallback((postType: 'magazines' | 'articles' | 'digests') => {
+    dispatch(setActivePostType(postType));
+  }, [dispatch]);
+
+  const handleRetry = useCallback(() => {
+    fetchDataForPostType(activePostType);
+  }, [activePostType, fetchDataForPostType]);
+
+  // Pull to refresh handler
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      // Fetch data based on active post type
+      const thunks = {
+        magazines: [
+          fetchMagazinesFeatured(),
+          fetchMagazinesTrending(),
+          fetchMagazinesRecommended(),
+          fetchMagazinesNew(),
+        ],
+        articles: [
+          fetchArticlesFeatured(),
+          fetchArticlesTrending(),
+          fetchArticlesRecommended(),
+          fetchArticlesNew(),
+        ],
+        digests: [
+          fetchDigestsFeatured(),
+          fetchDigestsTrending(),
+          fetchDigestsRecommended(),
+          fetchDigestsNew(),
+        ],
+      };
+      
+      await Promise.all(
+        thunks[activePostType as keyof typeof thunks].map(thunk => dispatch(thunk))
+      );
+    } catch (error) {
+      console.error('Failed to refresh content:', error);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [dispatch, activePostType]);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
@@ -47,273 +153,200 @@ export default function HomeScreen() {
     };
   });
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 10,
-    },
-    headerTop: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    welcomeText: {
-      flex: 1,
-      marginRight: 16,
-    },
-    welcomeTitle: {
-      color: colors.text,
-      fontSize: 28,
-      marginBottom: 4,
-    },
-    welcomeSubtitle: {
-      color: colors.textSecondary,
-      fontSize: 16,
-    },
-    themeToggle: {
-      backgroundColor: colors.card,
-      borderRadius: 12,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      elevation: 2,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    gradientButtonsContainer: {
-      flexDirection: 'row',
-      gap: 12,
-      marginBottom: 24,
-      paddingHorizontal: 20,
-    },
-    gradientButton: {
-      flex: 1,
-      height: 80,
-      borderRadius: 16,
-      overflow: 'hidden',
-      elevation: 4,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.15,
-      shadowRadius: 8,
-    },
-    gradientButtonContent: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      padding: 16,
-    },
-    gradientButtonText: {
-      color: '#ffffff',
-      fontWeight: '700',
-      fontSize: 14,
-      textAlign: 'center',
-      marginTop: 4,
-    },
-    gradientButtonSubtext: {
-      color: '#ffffff',
-      fontWeight: '700',
-      fontSize: 11,
-      textAlign: 'center',
-      opacity: 0.8,
-    },
-    sectionTitle: {
-      paddingHorizontal: 20,
-      marginBottom: 16,
-      color: colors.text,
-      fontSize: 22,
-    },
-    featuredSection: {
-      marginBottom: 32,
-    },
-    categorySection: {
-      marginBottom: 32,
-    },
-    emptyState: {
-      alignItems: 'center',
-      paddingVertical: 40,
-      paddingHorizontal: 20,
-    },
-    emptyStateText: {
-      textAlign: 'center',
-      marginTop: 16,
-      color: colors.textSecondary,
-    },
-  });
-
-  const gradientButtons = [
+  // Tab buttons configuration
+  const tabButtons = [
     {
+      id: 'magazines' as const,
       title: 'Magazines',
-      subtitle: 'In-depth reads',
-      colors: colors.gradientPrimary,
       icon: 'library-outline',
-      onPress: () => setSelectedCategory('magazines')
+      gradient: colors.gradientPrimary,
     },
     {
+      id: 'articles' as const,
       title: 'Articles',
-      subtitle: 'Quick insights',
-      colors: colors.gradientSecondary,
       icon: 'document-text-outline',
-      onPress: () => setSelectedCategory('articles')
+      gradient: colors.gradientSecondary,
     },
     {
+      id: 'digests' as const,
       title: 'Digests',
-      subtitle: 'Daily summaries',
-      colors: colors.gradientAccent,
       icon: 'flash-outline',
-      onPress: () => setSelectedCategory('digests')
-    }
+      gradient: colors.gradientAccent,
+    },
   ];
+
+
+
+
+
+  // Loading skeleton
+  const LoadingSkeleton = () => (
+    <CView>
+      {[1, 2, 3].map((i) => (
+        <CView
+          key={i}
+          height={120}
+          bg="card"
+          borderRadius="lg"
+          mb="md"
+          style={{ opacity: 0.6 }}
+        />
+      ))}
+    </CView>
+  );
+
+  // Error state
+  const ErrorState = () => (
+    <CView center py="xl">
+      <CView mb="md">
+        <CIcon 
+          name="alert-circle-outline" 
+          size={12} 
+          color="danger"
+        />
+      </CView>
+      <CText 
+        variant="body" 
+        color="textSecondary"
+        center
+        mb="lg"
+        lines={2}
+      >
+        {error || 'Something went wrong while loading content.'}
+      </CText>
+      <CButton
+        title="Try Again"
+        variant="primary"
+        onPress={handleRetry}
+        accessibilityLabel="Retry loading content"
+      />
+    </CView>
+  );
 
   return (
     <ScreenWrapper
       safeArea={true}
       keyboardAvoiding={false}
-      style={styles.container}
     >
       <AnimatedScrollView
+        style={{ backgroundColor: colors.background, flex: 1 }}
+        contentContainerStyle={{ 
+          paddingHorizontal: Spacing.lg,
+          flexGrow: 1 
+        }}
         showsVerticalScrollIndicator={false}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+            colors={[colors.primary]}
+            progressBackgroundColor={colors.card}
+            title="Pull to refresh"
+            titleColor={colors.textSecondary}
+          />
+        }
+        accessible={true}
+        accessibilityRole="scrollbar"
+        accessibilityLabel="Home screen content"
+        accessibilityHint="Scroll to browse content or pull down to refresh"
       >
-        <Animated.View style={[styles.header, headerAnimatedStyle]}>
-          <View style={styles.headerTop}>
-            <View style={styles.welcomeText}>
-              <H1 style={styles.welcomeTitle}>
-                Good morning! 👋
-              </H1>
-              <Body style={styles.welcomeSubtitle}>
-                What would you like to read today?
-              </Body>
-            </View>
-            <TouchableOpacity 
-              style={styles.themeToggle}
-              onPress={toggleTheme}
-              accessibilityLabel="Toggle theme"
-              accessible={true}
-            >
-              <Ionicons 
-                name={theme === 'dark' ? 'sunny' : 'moon'} 
-                size={24} 
-                color={colors.primary}
-              />
-            </TouchableOpacity>
-          </View>
-        </Animated.View>
-
-        <Animated.View 
-          style={styles.gradientButtonsContainer}
-          entering={FadeInDown.delay(200).duration(600)}
-        >
-          {gradientButtons.map((button, index) => (
-            <TouchableOpacity
-              key={button.title}
-              style={styles.gradientButton}
-              onPress={button.onPress}
-              activeOpacity={0.8}
-              accessibilityLabel={`${button.title} section`}
-              accessible={true}
-            >
-              <LinearGradient
-                colors={button.colors}
-                style={StyleSheet.absoluteFillObject}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-              />
-              <View style={styles.gradientButtonContent}>
-                <Ionicons 
-                  name={button.icon as any} 
-                  size={24} 
-                  color="#ffffff" 
-                />
-                <Body style={styles.gradientButtonText}>
-                  {button.title}
-                </Body>
-                <Body style={styles.gradientButtonSubtext}>
-                  {button.subtitle}
-                </Body>
-              </View>
-            </TouchableOpacity>
-          ))}
-        </Animated.View>
-
-        {featuredPosts.length > 0 && (
-          <Animated.View 
-            style={styles.featuredSection}
-            entering={FadeInUp.delay(400).duration(600)}
+        {/* Header Section */}
+        <Animated.View style={headerAnimatedStyle}>
+          <CView 
+            pt="lg" 
+            pb="md"
           >
-            <H1 style={styles.sectionTitle}>
-              Featured Today
-            </H1>
-            {featuredPosts.map((post) => (
-              <PostCard
-                key={post.id}
-                title={post.title}
-                description={post.description}
-                imageUrl={post.imageUrl}
-                category={post.category}
-                readTime={post.readTime}
-                author={post.author}
-                variant="featured"
-                onPress={() => console.log('Navigate to post:', post.id)}
+            <CView 
+              row 
+              justify="space-between" 
+              align="center" 
+              mb="lg"
+            >
+              <CView flex={1} mr="md">
+                <CText 
+                  variant="h1" 
+                  bold 
+                  mb="xs"
+                >
+                  Good morning! 👋
+                </CText>
+                <CText 
+                  variant="bodyLarge" 
+                  color="textSecondary"
+                >
+                  What would you like to read today?
+                </CText>
+              </CView>
+              <CButton
+                variant="ghost"
+                size="small"
+                onPress={toggleTheme}
+                accessibilityLabel="Toggle theme"
+                leftIcon={<CIcon name={theme === 'dark' ? 'sunny' : 'moon'} size={5} color="primary" />}
               />
-            ))}
-          </Animated.View>
+            </CView>
+          </CView>
+        </Animated.View>
+
+        {/* Post Type Tabs */}
+        <PostTypeTabs testID="home-post-type-tabs" />
+
+        {/* Content Sections */}
+        {loading ? (
+          <LoadingSkeleton />
+        ) : error ? (
+          <ErrorState />
+        ) : (
+          <>
+            {/* Featured Carousel */}
+            <FeaturedCarousel />
+
+            {/* Category Grid */}
+            <CategoryGrid 
+              maxCategories={6}
+              onSelectCategory={(category) => {
+                console.log('Selected category:', category.name);
+                // TODO: Filter content by category or navigate to category view
+              }}
+            />
+
+            {/* New Content */}
+            <ContentRow
+              title="New for You"
+              data={newContent}
+              loading={loading}
+              error={error}
+              onPressItem={(item) => console.log('Navigate to new post:', item.id)}
+              onPressSeeAll={() => console.log('View all new content')}
+            />
+
+            {/* Trending */}
+            <ContentRow
+              title="Trending Now"
+              data={trending}
+              loading={loading}
+              error={error}
+              onPressItem={(item) => console.log('Navigate to trending post:', item.id)}
+              onPressSeeAll={() => console.log('View all trending')}
+            />
+
+            {/* Recommended */}
+            <ContentRow
+              title="Recommended for You"
+              data={recommended}
+              loading={loading}
+              error={error}
+              onPressItem={(item) => console.log('Navigate to recommended post:', item.id)}
+              onPressSeeAll={() => console.log('View all recommended')}
+            />
+          </>
         )}
 
-        <Animated.View 
-          style={styles.categorySection}
-          entering={FadeInUp.delay(600).duration(600)}
-        >
-          <H1 style={styles.sectionTitle}>
-            Browse by Category
-          </H1>
-          
-          <ButtonSelectorGroup
-            options={['Magazines', 'Articles', 'Digests']}
-            selectedOption={selectedCategory.charAt(0).toUpperCase() + selectedCategory.slice(1)}
-            onSelect={(option) => setSelectedCategory(option.toLowerCase() as any)}
-            variant="gradient"
-          />
-
-          {categoryPosts.length > 0 ? (
-            categoryPosts.map((post) => (
-              <PostCard
-                key={post.id}
-                title={post.title}
-                description={post.description}
-                imageUrl={post.imageUrl}
-                category={post.category}
-                readTime={post.readTime}
-                author={post.author}
-                onPress={() => console.log('Navigate to post:', post.id)}
-              />
-            ))
-          ) : (
-            <View style={styles.emptyState}>
-              <Ionicons 
-                name="document-outline" 
-                size={48} 
-                color={colors.textSecondary} 
-              />
-              <Body style={styles.emptyStateText}>
-                No {selectedCategory} available at the moment.{'\n'}
-                Check back later for new content!
-              </Body>
-            </View>
-          )}
-        </Animated.View>
-
-        <View style={{ height: 40 }} />
-      </AnimatedScrollView>
+        <CView height={40} />
+              </AnimatedScrollView>
     </ScreenWrapper>
   );
 }

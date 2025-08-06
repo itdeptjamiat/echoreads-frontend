@@ -7,9 +7,7 @@ import { store, persistor } from '../src/redux/store';
 // Inner component to access Redux state after Provider
 function AppContent() {
   return (
-    <ThemeProvider>
-      <Stack screenOptions={{ headerShown: false }} />
-    </ThemeProvider>
+    <Stack screenOptions={{ headerShown: false }} />
   );
 }
 
@@ -17,7 +15,9 @@ export default function Layout() {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <AppContent />
+        <ThemeProvider>
+          <AppContent />
+        </ThemeProvider>
       </PersistGate>
     </Provider>
   );

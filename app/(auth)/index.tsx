@@ -1,36 +1,108 @@
-import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, Alert, TouchableOpacity } from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
-import { LinearGradient } from 'expo-linear-gradient';
-import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
-import { FormProvider, TextField, useFormContext } from '../../src/form';
-import { CustomButton } from '../../src/components/CustomButton';
-import { ScreenWrapper } from '../../src/components/ScreenWrapper';
-import { loginSchema, LoginFormData } from '../../src/form/schemas/authSchema';
-import { loginUser } from '../../src/redux/actions/authActions';
-import { selectAuthLoading, selectAuthError } from '../../src/redux/slices/selectState';
-import { AppDispatch } from '../../src/redux/store';
-import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import React, { useState } from "react";
+import { ScrollView, Alert } from "react-native";
+import { useDispatch, useSelector } from "react-redux";
+import { LinearGradient } from "expo-linear-gradient";
+import {
+  CView,
+  CText,
+  CButton,
+  CIcon,
+  CScrollView,
+} from "../../src/components/core";
+import { Spacing, Radius, Shadow } from "../../src/constants/layout";
+import { useTheme } from "../../src/hooks/useTheme";
+import { FormProvider, TextField, useFormContext } from "../../src/form";
+import { ScreenWrapper } from "../../src/components/ScreenWrapper";
+import { loginSchema, LoginFormData } from "../../src/form/schemas/authSchema";
+import { loginUser } from "../../src/redux/actions/authActions";
+import {
+  selectAuthLoading,
+  selectAuthError,
+} from "../../src/redux/slices/selectState";
+import { AppDispatch } from "../../src/redux/store";
+import { router } from "expo-router";
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  SlideInDown,
+} from "react-native-reanimated";
 
 // Component to access form context
 function SubmitButton({ isLoading }: { isLoading: boolean }) {
   const { handleSubmit } = useFormContext();
   const { colors } = useTheme();
 
+  const onPress = () => {
+    console.log("Submit button pressed");
+    handleSubmit();
+  };
+
   return (
-    <View style={{ marginTop: 24 }}>
-      <CustomButton
-        label={isLoading ? "Signing In..." : "Sign In"}
-        onPress={handleSubmit}
+    <CView mt="xl">
+      <CButton
+        title={isLoading ? "Signing In..." : "Sign In"}
+        onPress={onPress}
+        loading={isLoading}
         disabled={isLoading}
         variant="gradient"
         gradientColors={colors.gradientPrimary}
+        size="large"
+        fullWidth
         accessibilityLabel="Sign in button"
-        accessible={true}
       />
-    </View>
+    </CView>
+  );
+}
+
+// Component to render form fields with access to form methods
+function FormFields({
+  showPassword,
+  setShowPassword,
+}: {
+  showPassword: boolean;
+  setShowPassword: (show: boolean) => void;
+}) {
+  const { methods } = useFormContext();
+
+  return (
+    <CView>
+      <TextField
+        name="email"
+        control={methods.control}
+        label="Email"
+        placeholder="Enter your email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="email"
+        leftIcon="mail"
+        required
+      />
+
+      <TextField
+        name="password"
+        control={methods.control}
+        label="Password"
+        placeholder="Enter your password"
+        secureTextEntry={!showPassword}
+        autoCapitalize="none"
+        autoCorrect={false}
+        autoComplete="password"
+        leftIcon="lock-closed"
+        rightIcon={showPassword ? "eye-off" : "eye"}
+        onRightIconPress={() => setShowPassword(!showPassword)}
+        required
+      />
+
+      <CView align="flex-end" mt="sm">
+        <CButton
+          title="Forgot Password?"
+          variant="ghost"
+          size="small"
+          onPress={() => router.push("/(auth)/forgotPassword")}
+        />
+      </CView>
+    </CView>
   );
 }
 
@@ -42,157 +114,113 @@ export default function LoginScreen() {
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = async (data: LoginFormData) => {
+    console.log("Form submitted with data:", data);
+    console.log("Email:", data.email);
+    console.log("Password:", data.password);
+
+    // Test with hardcoded credentials for debugging
+    if (data.email === "test@test.com" && data.password === "password") {
+      console.log("Test login successful");
+      Alert.alert("Success", "Test login successful!");
+      return;
+    }
+
     try {
-      await dispatch(loginUser({
-        email: data.email.trim(),
-        password: data.password
-      })).unwrap();
+      const result = await dispatch(
+        loginUser({
+          email: data.email.trim(),
+          password: data.password,
+        })
+      ).unwrap();
+
+      console.log("Login successful:", result);
       
-      // Navigate to subscription page after successful login
-      router.push('/(onboarding)/choosePlan');
+      // Navigate based on user's plan
+      if (result.user?.plan === 'free') {
+        // User has free plan, go directly to main app
+        router.push("/(tabs)/");
+      } else if (result.user?.plan && result.user.plan !== 'free') {
+        // User has a paid plan, go to main app
+        router.push("/(tabs)/");
+      } else {
+        // No plan or new user, go to plan selection
+        router.push("/(onboarding)/choosePlan");
+      }
     } catch (error: any) {
-      Alert.alert('Login Failed', error || 'An error occurred during login');
+      console.error("Login error:", error);
+      Alert.alert("Login Failed", error || "An error occurred during login");
     }
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    gradientOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: 200,
-      opacity: 0.1,
-    },
-    content: {
-      flex: 1,
-      paddingHorizontal: 24,
-    },
-    header: {
-      marginTop: 40,
-      marginBottom: 32,
-    },
-    title: {
-      marginBottom: 12,
-    },
-    form: {
-      marginTop: 24,
-    },
-    forgotPassword: {
-      alignSelf: 'flex-end',
-      marginTop: 12,
-      marginBottom: 24,
-    },
-    forgotPasswordText: {
-      color: colors.primary,
-    },
-    footer: {
-      marginTop: 'auto',
-      paddingBottom: 24,
-      alignItems: 'center',
-    },
-    signupPrompt: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'center',
-      marginTop: 16,
-    },
-    signupButton: {
-      marginLeft: 4,
-    },
-    signupText: {
-      color: colors.primary,
-      fontWeight: '600',
-    }
-  });
-
   return (
-    <ScreenWrapper
-      safeArea={true}
-      keyboardAvoiding={true}
-      style={styles.container}
-    >
+    <ScreenWrapper safeArea={true} keyboardAvoiding={true}>
+      {/* Gradient Background */}
       <LinearGradient
         colors={colors.gradientPrimary}
-        style={styles.gradientOverlay}
+        style={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 300,
+          opacity: 0.1,
+        }}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
       />
 
-      <ScrollView 
-        style={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <H1 style={styles.title}>Welcome Back!</H1>
-          <Body>Sign in to continue reading</Body>
-        </View>
+      <CScrollView px="lg" showsVerticalScrollIndicator={false}>
+        {/* Header Section */}
+        <Animated.View entering={FadeInDown.delay(200).springify()}>
+          <CView mt="xxl" mb="xl">
+            <CText variant="h1" bold mb="sm" center>
+              Welcome Back!
+            </CText>
+            <CText variant="bodyLarge" color="textSecondary" center>
+              Sign in to continue reading
+            </CText>
+          </CView>
+        </Animated.View>
 
-        <FormProvider
-          schema={loginSchema}
-          defaultValues={{
-            email: '',
-            password: '',
-          }}
-          onSubmit={handleSubmit}
-        >
-          <View style={styles.form}>
-            <TextField
-              name="email"
-              placeholder="Email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-            />
-
-            <TextField
-              name="password"
-              placeholder="Password"
-              secureTextEntry={!showPassword}
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="password"
-              rightIcon={(
-                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                  <Ionicons 
-                    name={showPassword ? 'eye-off' : 'eye'} 
-                    size={24} 
-                    color={colors.textSecondary} 
-                  />
-                </TouchableOpacity>
-              )}
-            />
-
-            <TouchableOpacity 
-              style={styles.forgotPassword}
-              onPress={() => router.push('/(auth)/forgotPassword')}
+        {/* Form Section */}
+        <Animated.View entering={FadeInUp.delay(400).springify()}>
+          <CView bg="card" p="xl" borderRadius="xl" shadow="lg" mb="lg">
+            <FormProvider
+              schema={loginSchema}
+              defaultValues={{
+                email: "",
+                password: "",
+              }}
+              onSubmit={handleSubmit}
             >
-              <Body style={styles.forgotPasswordText}>
-                Forgot Password?
-              </Body>
-            </TouchableOpacity>
+              <FormFields
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+              />
+              <SubmitButton isLoading={isLoading} />
+            </FormProvider>
+          </CView>
+        </Animated.View>
 
-            <SubmitButton isLoading={isLoading} />
-          </View>
-        </FormProvider>
-
-        <View style={styles.footer}>
-          <View style={styles.signupPrompt}>
-            <Body>Don't have an account?</Body>
-            <TouchableOpacity 
-              style={styles.signupButton}
-              onPress={() => router.push('/(auth)/signup')}
-            >
-              <Body style={styles.signupText}>Sign Up</Body>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </ScrollView>
+        {/* Footer Section */}
+        <Animated.View entering={SlideInDown.delay(600).springify()}>
+          <CView center pb="xl">
+            <CView row align="center" center>
+              <CText variant="body" color="textSecondary">
+                Don't have an account?
+              </CText>
+              <CView ml="xs">
+                <CButton
+                  title="Sign Up"
+                  variant="ghost"
+                  size="small"
+                  onPress={() => router.push("/(auth)/signup")}
+                />
+              </CView>
+            </CView>
+          </CView>
+        </Animated.View>
+      </CScrollView>
     </ScreenWrapper>
   );
 }

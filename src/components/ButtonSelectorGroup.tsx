@@ -1,14 +1,12 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { CView, CText } from './core';
+import { Spacing, Radius, Shadow } from '../constants/layout';
 import { useTheme } from '../hooks/useTheme';
-import { Body } from '../theme/Typo';
 import Animated, { 
   useAnimatedStyle, 
   withSpring, 
-  interpolateColor,
-  useSharedValue,
-  withTiming 
+  useSharedValue
 } from 'react-native-reanimated';
 
 interface ButtonSelectorGroupProps {
@@ -18,7 +16,7 @@ interface ButtonSelectorGroupProps {
   variant?: 'default' | 'gradient';
 }
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedCView = Animated.createAnimatedComponent(CView);
 
 export function ButtonSelectorGroup({ 
   options, 
@@ -57,72 +55,66 @@ export function ButtonSelectorGroup({
     onSelect(option);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flexDirection: 'row',
-      backgroundColor: colors.muted,
-      borderRadius: 12,
-      padding: 4,
-      marginHorizontal: 20,
-      marginVertical: 16,
-    },
-    button: {
-      flex: 1,
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 8,
-      marginHorizontal: 2,
-      overflow: 'hidden',
-    },
-    buttonContent: {
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    selectedButton: {
-      elevation: 2,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-  });
-
   return (
-    <View style={styles.container}>
+    <CView 
+      row 
+      bg="surface"
+      borderRadius="md"
+      p="xs"
+      mx="lg"
+      my="md"
+    >
       {options.map((option) => {
         const isSelected = option === selectedOption;
         const gradientColors = getGradientColors(option, isSelected);
         
         return (
-          <AnimatedTouchableOpacity
+          <AnimatedCView
             key={option}
-            style={[styles.button, isSelected && styles.selectedButton, animatedStyle]}
+            flex={1}
+            py="sm"
+            px="md"
+            borderRadius="sm"
+            mx="xs"
+            overflow="hidden"
+            shadow={isSelected ? 'sm' : 'none'}
+            style={animatedStyle}
             onPress={() => handlePress(option)}
-            activeOpacity={0.8}
+            pressable
             accessibilityLabel={`${option} button`}
-            accessible={true}
           >
             <LinearGradient
               colors={isSelected && variant === 'gradient' ? gradientColors : [colors.card, colors.card]}
-              style={[StyleSheet.absoluteFillObject, { borderRadius: 8 }]}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                borderRadius: Radius.sm,
+              }}
             />
-            <View style={styles.buttonContent}>
-              <Body 
-                style={{ 
-                  color: isSelected && variant === 'gradient' 
-                    ? '#ffffff' 
+            <CView 
+              center
+              style={{ alignItems: 'center', justifyContent: 'center' }}
+            >
+              <CText 
+                variant="body"
+                color={
+                  isSelected && variant === 'gradient' 
+                    ? 'white' 
                     : isSelected 
-                      ? colors.primary 
-                      : colors.textSecondary,
-                  fontWeight: isSelected ? '600' : '400'
-                }}
+                      ? 'primary' 
+                      : 'textSecondary'
+                }
+                bold={isSelected}
               >
                 {option}
-              </Body>
-            </View>
-          </AnimatedTouchableOpacity>
+              </CText>
+            </CView>
+          </AnimatedCView>
         );
       })}
-    </View>
+    </CView>
   );
 }

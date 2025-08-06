@@ -3,7 +3,7 @@ import { RootState } from '../store';
 
 // Base selectors
 const selectAuthState = (state: RootState) => state.auth;
-const selectAuthData = (state: RootState) => state.auth?.data;
+export const selectAuthData = (state: RootState) => state.auth?.data;
 const selectAuthUser = (state: RootState) => state.auth?.data?.user;
 const selectAuthUserData = (state: RootState) => state.auth?.userData?.data;
 

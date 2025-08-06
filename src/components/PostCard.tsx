@@ -1,8 +1,9 @@
 import React from 'react';
-import { View, TouchableOpacity, StyleSheet, Image, Dimensions } from 'react-native';
+import { Image, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { CView, CText, CIcon } from './core';
+import { Spacing, Radius, Shadow } from '../constants/layout';
 import { useTheme } from '../hooks/useTheme';
-import { H1, Body } from '../theme/Typo';
 import Animated, { 
   useAnimatedStyle, 
   withSpring, 
@@ -22,7 +23,7 @@ interface PostCardProps {
   variant?: 'default' | 'featured';
 }
 
-const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpacity);
+const AnimatedCView = Animated.createAnimatedComponent(CView);
 
 export function PostCard({ 
   title, 
@@ -50,6 +51,19 @@ export function PostCard({
     }
   };
 
+  const getCategoryIcon = () => {
+    switch (category) {
+      case 'magazine':
+        return 'book';
+      case 'article':
+        return 'document-text';
+      case 'digest':
+        return 'newspaper';
+      default:
+        return 'book';
+    }
+  };
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       transform: [{ scale: scale.value }],
@@ -63,159 +77,146 @@ export function PostCard({
     onPress?.();
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      backgroundColor: colors.card,
-      borderRadius: variant === 'featured' ? 20 : 16,
-      marginHorizontal: 20,
-      marginVertical: 8,
-      overflow: 'hidden',
-      elevation: variant === 'featured' ? 8 : 4,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: variant === 'featured' ? 4 : 2 },
-      shadowOpacity: variant === 'featured' ? 0.15 : 0.1,
-      shadowRadius: variant === 'featured' ? 8 : 4,
-    },
-    featuredContainer: {
-      width: screenWidth - 40,
-      height: 240,
-    },
-    defaultContainer: {
+  const getCardStyle = () => {
+    const baseStyle = {
+      bg: 'card',
+      borderRadius: variant === 'featured' ? 'xl' : 'lg',
+      mx: 'lg',
+      my: 'sm',
+      shadow: variant === 'featured' ? 'lg' : 'md',
+      overflow: 'hidden' as const,
+    };
+
+    if (variant === 'featured') {
+      return {
+        ...baseStyle,
+        width: screenWidth - (Spacing.lg * 2),
+        height: 240,
+      };
+    }
+
+    return {
+      ...baseStyle,
       minHeight: 120,
-    },
-    imageContainer: {
-      height: variant === 'featured' ? 140 : 80,
-      position: 'relative',
-      overflow: 'hidden',
-    },
-    image: {
-      width: '100%',
-      height: '100%',
-      resizeMode: 'cover',
-    },
-    gradientOverlay: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      opacity: 0.8,
-    },
-    categoryBadge: {
-      position: 'absolute',
-      top: 12,
-      left: 12,
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 20,
-      backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    },
-    content: {
-      padding: variant === 'featured' ? 20 : 16,
-      flex: 1,
-    },
-    title: {
-      marginBottom: 8,
-      lineHeight: variant === 'featured' ? 28 : 24,
-    },
-    description: {
-      marginBottom: 12,
-      lineHeight: 20,
-    },
-    footer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginTop: 'auto',
-    },
-    author: {
-      flex: 1,
-    },
-    readTime: {
-      flexShrink: 0,
-    },
-  });
+    };
+  };
 
   return (
-    <AnimatedTouchableOpacity
-      style={[
-        styles.container,
-        variant === 'featured' ? styles.featuredContainer : styles.defaultContainer,
-        animatedStyle
-      ]}
+    <AnimatedCView
+      {...getCardStyle()}
+      style={animatedStyle}
       onPress={handlePress}
-      activeOpacity={0.9}
+      pressable
       accessibilityLabel={`${category} post: ${title}`}
-      accessible={true}
     >
       {imageUrl && (
-        <View style={styles.imageContainer}>
+        <CView 
+          height={variant === 'featured' ? 140 : 80}
+          position="relative"
+          overflow="hidden"
+        >
           <Image 
             source={{ uri: imageUrl }} 
-            style={styles.image}
+            style={{
+              width: '100%',
+              height: '100%',
+              resizeMode: 'cover',
+            }}
             defaultSource={require('../../assets/icon.png')}
           />
           <LinearGradient
             colors={['transparent', 'rgba(0,0,0,0.3)']}
-            style={styles.gradientOverlay}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              opacity: 0.8,
+            }}
           />
-          <View style={styles.categoryBadge}>
-            <Body style={{ 
-              color: colors.foreground, 
-              fontSize: 12, 
-              fontWeight: '600',
-              textTransform: 'capitalize'
-            }}>
+          <CView 
+            position="absolute"
+            top={12}
+            left={12}
+            px="md"
+            py="xs"
+            borderRadius="full"
+            bg="background"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.9)' }}
+            row
+            align="center"
+          >
+            <CIcon 
+              name={getCategoryIcon()} 
+              size={3} 
+              color="primary"
+              mr="xs"
+            />
+            <CText 
+              variant="caption" 
+              color="foreground" 
+              bold
+              style={{ textTransform: 'capitalize' }}
+            >
               {category}
-            </Body>
-          </View>
-        </View>
+            </CText>
+          </CView>
+        </CView>
       )}
       
-      <View style={styles.content}>
-        <H1 
-          style={[
-            styles.title, 
-            { 
-              color: colors.text,
-              fontSize: variant === 'featured' ? 20 : 18,
-            }
-          ]}
-          numberOfLines={variant === 'featured' ? 2 : 2}
+      <CView 
+        p={variant === 'featured' ? 'lg' : 'md'}
+        flex={1}
+      >
+        <CText 
+          variant={variant === 'featured' ? 'h3' : 'bodyLarge'}
+          bold
+          mb="sm"
+          lines={2}
+          style={{
+            lineHeight: variant === 'featured' ? 28 : 24,
+          }}
         >
           {title}
-        </H1>
+        </CText>
         
-        <Body 
-          style={[
-            styles.description, 
-            { color: colors.textSecondary }
-          ]}
-          numberOfLines={variant === 'featured' ? 3 : 2}
+        <CText 
+          variant="body"
+          color="textSecondary"
+          mb="md"
+          lines={variant === 'featured' ? 3 : 2}
+          style={{ lineHeight: 20 }}
         >
           {description}
-        </Body>
+        </CText>
         
-        <View style={styles.footer}>
+        <CView 
+          row 
+          justify="between" 
+          align="center"
+          mt="auto"
+        >
           {author && (
-            <Body style={[styles.author, { 
-              color: colors.textSecondary, 
-              fontSize: 12 
-            }]}>
+            <CText 
+              variant="caption" 
+              color="textSecondary"
+              flex={1}
+            >
               By {author}
-            </Body>
+            </CText>
           )}
           {readTime && (
-            <Body style={[styles.readTime, { 
-              color: colors.primary, 
-              fontSize: 12,
-              fontWeight: '500' 
-            }]}>
+            <CText 
+              variant="caption" 
+              color="primary"
+              bold
+            >
               {readTime}
-            </Body>
+            </CText>
           )}
-        </View>
-      </View>
-    </AnimatedTouchableOpacity>
+        </CView>
+      </CView>
+    </AnimatedCView>
   );
 }

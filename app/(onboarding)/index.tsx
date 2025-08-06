@@ -1,12 +1,19 @@
 import React, { useState, useRef } from 'react';
-import { View, StyleSheet, Dimensions, FlatList } from 'react-native';
+import { Dimensions, FlatList } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { CView, CText, CButton, CIcon } from '../../src/components/core';
+import { Spacing, Radius, Shadow } from '../../src/constants/layout';
 import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
-import { CustomButton } from '../../src/components/CustomButton';
 import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { router } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
+import { useDispatch } from 'react-redux';
+import { markIntroSeen, completeIntro } from '../../src/redux/slices/onboardingSlice';
+import Animated, { 
+  FadeInDown, 
+  FadeInUp, 
+  SlideInLeft,
+  SlideInRight 
+} from 'react-native-reanimated';
 
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -56,6 +63,7 @@ const introSlides: IntroSlide[] = [
 
 export default function IntroScreen() {
   const { colors } = useTheme();
+  const dispatch = useDispatch();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
@@ -70,177 +78,129 @@ export default function IntroScreen() {
   };
 
   const handleSkip = () => {
+    dispatch(markIntroSeen());
+    dispatch(completeIntro());
     router.push('/(auth)/');
   };
 
   const handleGetStarted = () => {
+    dispatch(markIntroSeen());
+    dispatch(completeIntro());
     router.push('/(auth)/');
   };
 
   const renderSlide = ({ item, index }: { item: IntroSlide; index: number }) => {
     return (
-      <View style={styles.slide}>
+      <CView 
+        width={screenWidth}
+        height={screenHeight}
+        position="relative"
+      >
         <LinearGradient
           colors={item.gradient}
-          style={styles.slideGradient}
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: screenHeight * 0.4,
+            opacity: 0.1,
+          }}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         />
         
-        <View style={styles.slideContent}>
-          <View style={styles.iconContainer}>
-            <View style={[styles.iconCircle, { backgroundColor: colors.card }]}>
-              <Ionicons 
+        <CView 
+          center
+          px="xl"
+          py="xxl"
+        >
+          <Animated.View entering={FadeInDown.delay(200).springify()}>
+            <CView 
+              width={120}
+              height={120}
+              borderRadius="full"
+              bg="card"
+              center
+              shadow="xl"
+              mb="xl"
+            >
+              <CIcon 
                 name={item.icon as any} 
-                size={60} 
-                color={item.gradient[0]} 
+                size={12} 
+                color={item.gradient[0]}
               />
-            </View>
-          </View>
+            </CView>
+          </Animated.View>
           
-          <View style={styles.textContainer}>
-            <H1 style={[styles.title, { color: colors.text }]}>
-              {item.title}
-            </H1>
-            
-            <Body style={[styles.subtitle, { color: item.gradient[0] }]}>
-              {item.subtitle}
-            </Body>
-            
-            <Body style={[styles.description, { color: colors.textSecondary }]}>
-              {item.description}
-            </Body>
-          </View>
-        </View>
-      </View>
+          <Animated.View entering={SlideInLeft.delay(400).springify()}>
+            <CView center maxWidth={320}>
+              <CText 
+                variant="h1" 
+                bold 
+                center
+                mb="md"
+                lines={2}
+              >
+                {item.title}
+              </CText>
+              
+              <CText 
+                variant="h3" 
+                color={item.gradient[0]}
+                center
+                mb="lg"
+                bold
+              >
+                {item.subtitle}
+              </CText>
+              
+              <CText 
+                variant="bodyLarge" 
+                color="textSecondary"
+                center
+                lines={4}
+              >
+                {item.description}
+              </CText>
+            </CView>
+          </Animated.View>
+        </CView>
+      </CView>
     );
   };
 
   const renderDots = () => {
     return (
-      <View style={styles.dotsContainer}>
+      <CView 
+        row 
+        center 
+        mb="xl"
+      >
         {introSlides.map((_, index) => (
-          <View
+          <CView
             key={index}
-            style={[
-              styles.dot,
-              {
-                backgroundColor: index === currentIndex ? colors.primary : colors.border,
-                opacity: index === currentIndex ? 1 : 0.5,
-                transform: [{ scale: index === currentIndex ? 1.2 : 1 }],
-              }
-            ]}
+            width={12}
+            height={12}
+            borderRadius="full"
+            bg={index === currentIndex ? 'primary' : 'border'}
+            mx="xs"
+            style={{
+              opacity: index === currentIndex ? 1 : 0.5,
+              transform: [{ scale: index === currentIndex ? 1.2 : 1 }],
+            }}
           />
         ))}
-      </View>
+      </CView>
     );
   };
-
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    slide: {
-      width: screenWidth,
-      height: screenHeight,
-      position: 'relative',
-    },
-    slideGradient: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: screenHeight * 0.4,
-      opacity: 0.1,
-    },
-    slideContent: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 32,
-      paddingVertical: 60,
-    },
-    iconContainer: {
-      marginBottom: 60,
-    },
-    iconCircle: {
-      width: 120,
-      height: 120,
-      borderRadius: 60,
-      justifyContent: 'center',
-      alignItems: 'center',
-      elevation: 8,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 4 },
-      shadowOpacity: 0.2,
-      shadowRadius: 12,
-    },
-    textContainer: {
-      alignItems: 'center',
-      maxWidth: 320,
-    },
-    title: {
-      fontSize: 32,
-      fontWeight: '700',
-      textAlign: 'center',
-      marginBottom: 16,
-      lineHeight: 40,
-    },
-    subtitle: {
-      fontSize: 18,
-      fontWeight: '600',
-      textAlign: 'center',
-      marginBottom: 24,
-      lineHeight: 26,
-    },
-    description: {
-      fontSize: 16,
-      textAlign: 'center',
-      lineHeight: 24,
-    },
-    bottomContainer: {
-      position: 'absolute',
-      bottom: 0,
-      left: 0,
-      right: 0,
-      paddingHorizontal: 32,
-      paddingBottom: 50,
-      backgroundColor: colors.background,
-    },
-    dotsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 40,
-    },
-    dot: {
-      width: 12,
-      height: 12,
-      borderRadius: 6,
-      marginHorizontal: 6,
-    },
-    buttonsContainer: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      gap: 16,
-    },
-    skipButton: {
-      flex: 1,
-    },
-    nextButton: {
-      flex: 1,
-    },
-  });
 
   return (
     <ScreenWrapper
       safeArea={true}
       topSafeArea={true}
       bottomSafeArea={true}
-      keyboardAvoiding={false} // Since this screen doesn't have inputs
-      style={styles.container}
+      keyboardAvoiding={false}
     >
       <FlatList
         ref={flatListRef}
@@ -257,32 +217,46 @@ export default function IntroScreen() {
         scrollEventThrottle={16}
       />
       
-      <View style={styles.bottomContainer}>
-        {renderDots()}
-        
-        <View style={styles.buttonsContainer}>
-          <View style={styles.skipButton}>
-            <CustomButton
-              label="Skip"
-              variant="ghost"
-              onPress={handleSkip}
-              accessibilityLabel="Skip intro"
-              accessible={true}
-            />
-          </View>
+      <CView 
+        position="absolute"
+        bottom={0}
+        left={0}
+        right={0}
+        px="xl"
+        pb="xl"
+        bg="background"
+      >
+        <Animated.View entering={FadeInUp.delay(600).springify()}>
+          {renderDots()}
           
-          <View style={styles.nextButton}>
-            <CustomButton
-              label={currentIndex === introSlides.length - 1 ? "Get Started" : "Next"}
-              variant="gradient"
-              gradientColors={introSlides[currentIndex].gradient}
-              onPress={handleNext}
-              accessibilityLabel={currentIndex === introSlides.length - 1 ? "Get started" : "Next slide"}
-              accessible={true}
-            />
-          </View>
-        </View>
-      </View>
+          <CView 
+            row 
+            justify="between" 
+            align="center"
+            style={{ gap: Spacing.md }}
+          >
+            <CView flex={1}>
+              <CButton
+                title="Skip"
+                variant="ghost"
+                onPress={handleSkip}
+                accessibilityLabel="Skip intro"
+              />
+            </CView>
+            
+            <CView flex={1}>
+              <CButton
+                title={currentIndex === introSlides.length - 1 ? "Get Started" : "Next"}
+                variant="gradient"
+                gradientColors={introSlides[currentIndex].gradient}
+                onPress={handleNext}
+                size="large"
+                accessibilityLabel={currentIndex === introSlides.length - 1 ? "Get started" : "Next slide"}
+              />
+            </CView>
+          </CView>
+        </Animated.View>
+      </CView>
     </ScreenWrapper>
   );
 }

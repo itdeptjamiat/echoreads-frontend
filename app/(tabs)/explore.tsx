@@ -1,11 +1,11 @@
 import React, { useState, useMemo } from 'react';
-import { View, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { CView, CText, CButton, CIcon, CScrollView } from '../../src/components/core';
+import { Spacing, Radius, Shadow } from '../../src/constants/layout';
 import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
 import { SearchBar } from '../../src/components/SearchBar';
 import { ButtonSelectorGroup } from '../../src/components/ButtonSelectorGroup';
 import { PostCard } from '../../src/components/PostCard';
+import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { getAllDemoPosts, DemoPost } from '../../src/data/demoData';
 import Animated, { 
   FadeInDown,
@@ -13,7 +13,7 @@ import Animated, {
   Layout 
 } from 'react-native-reanimated';
 
-const AnimatedView = Animated.createAnimatedComponent(View);
+const AnimatedCView = Animated.createAnimatedComponent(CView);
 
 export default function ExploreScreen() {
   const { colors } = useTheme();
@@ -67,94 +67,6 @@ export default function ExploreScreen() {
     setShowFilters(!showFilters);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    safeArea: {
-      flex: 1,
-    },
-    header: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 10,
-    },
-    headerTitle: {
-      marginBottom: 16,
-    },
-    filterContainer: {
-      backgroundColor: colors.card,
-      marginHorizontal: 20,
-      marginBottom: 16,
-      borderRadius: 16,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
-      elevation: 2,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    filterTitle: {
-      marginBottom: 16,
-    },
-    filterOptions: {
-      gap: 8,
-    },
-    filterOption: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingVertical: 12,
-      paddingHorizontal: 16,
-      borderRadius: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-    },
-    selectedFilterOption: {
-      backgroundColor: colors.primary,
-      borderColor: colors.primary,
-    },
-    resultsContainer: {
-      flex: 1,
-    },
-    resultsHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      marginBottom: 16,
-    },
-    resultsCount: {
-      flex: 1,
-    },
-    clearButton: {
-      paddingHorizontal: 16,
-      paddingVertical: 8,
-      borderRadius: 8,
-      backgroundColor: colors.muted,
-    },
-    emptyState: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 40,
-      paddingVertical: 60,
-    },
-    emptyStateText: {
-      textAlign: 'center',
-      marginTop: 16,
-      lineHeight: 24,
-    },
-    emptyStateSubtext: {
-      textAlign: 'center',
-      marginTop: 8,
-      lineHeight: 20,
-    },
-  });
-
   const filterOptions = [
     { label: 'All', value: 'All', count: categoryStats.total },
     { label: 'Magazines', value: 'Magazine', count: categoryStats.magazine },
@@ -163,96 +75,136 @@ export default function ExploreScreen() {
   ];
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.safeArea} showsVerticalScrollIndicator={false}>
-        <Animated.View style={styles.header} entering={FadeInDown.duration(600)}>
-          <H1 style={[styles.headerTitle, { color: colors.text, fontSize: 28 }]}>
-            Explore Content
-          </H1>
-          
-          <SearchBar
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            showFilter={true}
-            onFilterPress={handleFilterPress}
-            placeholder="Search magazines, articles, digests..."
-          />
+    <ScreenWrapper
+      safeArea={true}
+      keyboardAvoiding={false}
+    >
+      <CScrollView 
+        px="lg"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Section */}
+        <Animated.View entering={FadeInDown.duration(600)}>
+          <CView pt="lg" pb="md">
+            <CText 
+              variant="h1" 
+              bold 
+              mb="md"
+            >
+              Explore Content
+            </CText>
+            
+            <SearchBar
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              showFilter={true}
+              onFilterPress={handleFilterPress}
+              placeholder="Search magazines, articles, digests..."
+            />
+          </CView>
         </Animated.View>
 
+        {/* Filter Section */}
         {showFilters && (
-          <AnimatedView
-            style={styles.filterContainer}
+          <AnimatedCView
+            bg="card"
+            p="lg"
+            borderRadius="lg"
+            borderWidth={1}
+            borderColor="border"
+            shadow="sm"
+            mb="md"
             entering={FadeInDown.duration(400)}
             exiting={FadeInUp.duration(300)}
             layout={Layout.springify()}
           >
-            <H1 style={[styles.filterTitle, { color: colors.text, fontSize: 18 }]}>
+            <CText 
+              variant="h3" 
+              bold 
+              mb="md"
+            >
               Filter by Category
-            </H1>
+            </CText>
             
-            <View style={styles.filterOptions}>
+            <CView style={{ gap: Spacing.sm }}>
               {filterOptions.map((option) => (
-                <TouchableOpacity
+                <CView
                   key={option.value}
-                  style={[
-                    styles.filterOption,
-                    selectedFilter === option.value && styles.selectedFilterOption
-                  ]}
+                  row 
+                  justify="between" 
+                  align="center"
+                  py="sm"
+                  px="md"
+                  borderRadius="md"
+                  borderWidth={1}
+                  borderColor="border"
+                  bg={selectedFilter === option.value ? 'primary' : 'transparent'}
                   onPress={() => setSelectedFilter(option.value as any)}
+                  pressable
                   accessibilityLabel={`Filter by ${option.label}`}
-                  accessible={true}
                 >
-                  <Body style={{ 
-                    color: selectedFilter === option.value ? '#ffffff' : colors.text,
-                    fontWeight: selectedFilter === option.value ? '600' : '400'
-                  }}>
+                  <CText 
+                    color={selectedFilter === option.value ? 'white' : 'text'}
+                    bold={selectedFilter === option.value}
+                  >
                     {option.label}
-                  </Body>
-                  <Body style={{ 
-                    color: selectedFilter === option.value ? 'rgba(255,255,255,0.8)' : colors.textSecondary,
-                    fontSize: 14
-                  }}>
+                  </CText>
+                  <CText 
+                    variant="bodySmall"
+                    color={selectedFilter === option.value ? 'white' : 'textSecondary'}
+                    style={{ opacity: selectedFilter === option.value ? 0.8 : 1 }}
+                  >
                     {option.count}
-                  </Body>
-                </TouchableOpacity>
+                  </CText>
+                </CView>
               ))}
-            </View>
-          </AnimatedView>
+            </CView>
+          </AnimatedCView>
         )}
 
-        <AnimatedView style={styles.resultsContainer} entering={FadeInUp.delay(300).duration(600)}>
-          <View style={styles.resultsHeader}>
-            <View style={styles.resultsCount}>
-              <Body style={{ color: colors.text, fontWeight: '600', fontSize: 16 }}>
+        {/* Results Section */}
+        <AnimatedCView entering={FadeInUp.delay(300).duration(600)}>
+          <CView 
+            row 
+            justify="between" 
+            align="center" 
+            mb="md"
+          >
+            <CView flex={1}>
+              <CText 
+                variant="bodyLarge" 
+                bold
+              >
                 {filteredPosts.length} results
-              </Body>
+              </CText>
               {searchQuery.trim() && (
-                <Body style={{ color: colors.textSecondary, fontSize: 14, marginTop: 2 }}>
+                <CText 
+                  variant="bodySmall" 
+                  color="textSecondary"
+                  mt="xs"
+                >
                   for "{searchQuery}"
-                </Body>
+                </CText>
               )}
-            </View>
+            </CView>
             
             {(searchQuery.trim() || selectedFilter !== 'All') && (
-              <TouchableOpacity
-                style={styles.clearButton}
+              <CButton
+                title="Clear"
+                variant="ghost"
+                size="small"
                 onPress={() => {
                   setSearchQuery('');
                   setSelectedFilter('All');
                 }}
                 accessibilityLabel="Clear filters"
-                accessible={true}
-              >
-                <Body style={{ color: colors.primary, fontSize: 14, fontWeight: '500' }}>
-                  Clear
-                </Body>
-              </TouchableOpacity>
+              />
             )}
-          </View>
+          </CView>
 
           {filteredPosts.length > 0 ? (
             filteredPosts.map((post, index) => (
-              <AnimatedView
+              <AnimatedCView
                 key={post.id}
                 entering={FadeInUp.delay(index * 100).duration(500)}
                 layout={Layout.springify()}
@@ -266,30 +218,44 @@ export default function ExploreScreen() {
                   author={post.author}
                   onPress={() => console.log('Navigate to post:', post.id)}
                 />
-              </AnimatedView>
+              </AnimatedCView>
             ))
           ) : (
-            <View style={styles.emptyState}>
-              <Ionicons 
+            <CView 
+              center 
+              py="xxl"
+            >
+              <CIcon 
                 name="search-outline" 
-                size={64} 
-                color={colors.textSecondary} 
+                size={16} 
+                color="textSecondary"
+                mb="lg"
               />
-              <H1 style={[styles.emptyStateText, { color: colors.text, fontSize: 20 }]}>
+              <CText 
+                variant="h3" 
+                bold 
+                center
+                mb="sm"
+              >
                 No results found
-              </H1>
-              <Body style={[styles.emptyStateSubtext, { color: colors.textSecondary }]}>
+              </CText>
+              <CText 
+                variant="body" 
+                color="textSecondary"
+                center
+                lines={4}
+              >
                 {searchQuery.trim() 
                   ? `We couldn't find any content matching "${searchQuery}". Try different keywords or browse all content.`
                   : 'No content available in this category. Check back later for updates!'
                 }
-              </Body>
-            </View>
+              </CText>
+            </CView>
           )}
-        </AnimatedView>
+        </AnimatedCView>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </SafeAreaView>
+        <CView height={40} />
+      </CScrollView>
+    </ScreenWrapper>
   );
 }

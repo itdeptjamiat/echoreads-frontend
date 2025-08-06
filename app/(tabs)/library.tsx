@@ -1,11 +1,10 @@
 import React, { useState } from 'react';
-import { View, ScrollView, StyleSheet, SafeAreaView, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { CView, CText, CButton, CIcon, CScrollView } from '../../src/components/core';
+import { Spacing, Radius, Shadow } from '../../src/constants/layout';
 import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
 import { ButtonSelectorGroup } from '../../src/components/ButtonSelectorGroup';
 import { PostCard } from '../../src/components/PostCard';
-import { CustomButton } from '../../src/components/CustomButton';
+import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { getDemoSavedContent, getDemoDownloadedContent, DemoPost } from '../../src/data/libraryData';
 import Animated, { 
   FadeInDown,
@@ -13,7 +12,7 @@ import Animated, {
   Layout 
 } from 'react-native-reanimated';
 
-const AnimatedView = Animated.createAnimatedComponent(View);
+const AnimatedCView = Animated.createAnimatedComponent(CView);
 
 export default function LibraryScreen() {
   const { colors } = useTheme();
@@ -73,167 +72,143 @@ export default function LibraryScreen() {
 
   const emptyState = getEmptyStateContent();
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    safeArea: {
-      flex: 1,
-    },
-    header: {
-      paddingHorizontal: 20,
-      paddingTop: 20,
-      paddingBottom: 10,
-    },
-    headerTop: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: 20,
-    },
-    headerTitle: {
-      flex: 1,
-    },
-    settingsButton: {
-      backgroundColor: colors.card,
-      borderRadius: 12,
-      padding: 12,
-      borderWidth: 1,
-      borderColor: colors.border,
-      elevation: 2,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-    },
-    statsContainer: {
-      flexDirection: 'row',
-      gap: 12,
-      marginBottom: 24,
-      paddingHorizontal: 20,
-    },
-    statCard: {
-      flex: 1,
-      backgroundColor: colors.card,
-      borderRadius: 16,
-      padding: 16,
-      borderWidth: 1,
-      borderColor: colors.border,
-      elevation: 2,
-      shadowColor: colors.shadow,
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 4,
-      alignItems: 'center',
-    },
-    statNumber: {
-      fontSize: 24,
-      fontWeight: '700',
-      color: colors.primary,
-      marginBottom: 4,
-    },
-    statLabel: {
-      fontSize: 12,
-      color: colors.textSecondary,
-      textAlign: 'center',
-    },
-    contentContainer: {
-      flex: 1,
-    },
-    sectionHeader: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 20,
-      marginBottom: 16,
-    },
-    sectionTitle: {
-      flex: 1,
-    },
-    sortButton: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      paddingHorizontal: 12,
-      paddingVertical: 6,
-      borderRadius: 8,
-      backgroundColor: colors.muted,
-      gap: 4,
-    },
-    emptyState: {
-      flex: 1,
-      justifyContent: 'center',
-      alignItems: 'center',
-      paddingHorizontal: 40,
-      paddingVertical: 60,
-    },
-    emptyStateIcon: {
-      width: 80,
-      height: 80,
-      borderRadius: 40,
-      backgroundColor: colors.muted,
-      justifyContent: 'center',
-      alignItems: 'center',
-      marginBottom: 24,
-    },
-    emptyStateText: {
-      textAlign: 'center',
-      marginBottom: 8,
-      lineHeight: 28,
-    },
-    emptyStateSubtext: {
-      textAlign: 'center',
-      marginBottom: 32,
-      lineHeight: 24,
-    },
-  });
-
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.safeArea} showsVerticalScrollIndicator={false}>
-        <Animated.View style={styles.header} entering={FadeInDown.duration(600)}>
-          <View style={styles.headerTop}>
-            <View style={styles.headerTitle}>
-              <H1 style={{ color: colors.text, fontSize: 28, marginBottom: 4 }}>
-                My Library
-              </H1>
-              <Body style={{ color: colors.textSecondary, fontSize: 16 }}>
-                Your saved and downloaded content
-              </Body>
-            </View>
-            <TouchableOpacity 
-              style={styles.settingsButton}
-              onPress={() => console.log('Open settings')}
-              accessibilityLabel="Library settings"
-              accessible={true}
+    <ScreenWrapper
+      safeArea={true}
+      keyboardAvoiding={false}
+    >
+      <CScrollView 
+        px="lg"
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Header Section */}
+        <Animated.View entering={FadeInDown.duration(600)}>
+          <CView pt="lg" pb="md">
+            <CView 
+              row 
+              justify="between" 
+              align="center" 
+              mb="lg"
             >
-              <Ionicons 
-                name="settings-outline" 
-                size={24} 
-                color={colors.primary}
+              <CView flex={1} mr="md">
+                <CText 
+                  variant="h1" 
+                  bold 
+                  mb="xs"
+                >
+                  My Library
+                </CText>
+                <CText 
+                  variant="bodyLarge" 
+                  color="textSecondary"
+                >
+                  Your saved and downloaded content
+                </CText>
+              </CView>
+              <CButton
+                variant="ghost"
+                size="small"
+                onPress={() => console.log('Open settings')}
+                accessibilityLabel="Library settings"
+                leftIcon={<CIcon name="settings-outline" size={5} color="primary" />}
               />
-            </TouchableOpacity>
-          </View>
+            </CView>
+          </CView>
         </Animated.View>
 
+        {/* Stats Section */}
         <Animated.View 
-          style={styles.statsContainer}
           entering={FadeInDown.delay(200).duration(600)}
         >
-          <View style={styles.statCard}>
-            <Body style={styles.statNumber}>{savedContent.length}</Body>
-            <Body style={styles.statLabel}>Saved</Body>
-          </View>
-          <View style={styles.statCard}>
-            <Body style={styles.statNumber}>{downloadedContent.length}</Body>
-            <Body style={styles.statLabel}>Downloaded</Body>
-          </View>
-          <View style={styles.statCard}>
-            <Body style={styles.statNumber}>{historyContent.length}</Body>
-            <Body style={styles.statLabel}>Recently Read</Body>
-          </View>
+          <CView 
+            row 
+            mb="lg"
+            style={{ gap: Spacing.md }}
+          >
+            <CView 
+              flex={1}
+              bg="card"
+              p="md"
+              borderRadius="lg"
+              borderWidth={1}
+              borderColor="border"
+              shadow="sm"
+              center
+            >
+              <CText 
+                variant="h2" 
+                bold 
+                color="primary"
+                mb="xs"
+              >
+                {savedContent.length}
+              </CText>
+              <CText 
+                variant="caption" 
+                color="textSecondary"
+                center
+              >
+                Saved
+              </CText>
+            </CView>
+            
+            <CView 
+              flex={1}
+              bg="card"
+              p="md"
+              borderRadius="lg"
+              borderWidth={1}
+              borderColor="border"
+              shadow="sm"
+              center
+            >
+              <CText 
+                variant="h2" 
+                bold 
+                color="primary"
+                mb="xs"
+              >
+                {downloadedContent.length}
+              </CText>
+              <CText 
+                variant="caption" 
+                color="textSecondary"
+                center
+              >
+                Downloaded
+              </CText>
+            </CView>
+            
+            <CView 
+              flex={1}
+              bg="card"
+              p="md"
+              borderRadius="lg"
+              borderWidth={1}
+              borderColor="border"
+              shadow="sm"
+              center
+            >
+              <CText 
+                variant="h2" 
+                bold 
+                color="primary"
+                mb="xs"
+              >
+                {historyContent.length}
+              </CText>
+              <CText 
+                variant="caption" 
+                color="textSecondary"
+                center
+              >
+                Recently Read
+              </CText>
+            </CView>
+          </CView>
         </Animated.View>
 
+        {/* Tab Selector */}
         <Animated.View entering={FadeInUp.delay(400).duration(600)}>
           <ButtonSelectorGroup
             options={['Saved', 'Downloaded', 'History']}
@@ -242,33 +217,36 @@ export default function LibraryScreen() {
           />
         </Animated.View>
 
-        <AnimatedView style={styles.contentContainer} entering={FadeInUp.delay(600).duration(600)}>
+        {/* Content Section */}
+        <AnimatedCView entering={FadeInUp.delay(600).duration(600)}>
           {currentContent.length > 0 && (
-            <View style={styles.sectionHeader}>
-              <H1 style={[styles.sectionTitle, { color: colors.text, fontSize: 20 }]}>
+            <CView 
+              row 
+              justify="between" 
+              align="center" 
+              mb="md"
+            >
+              <CText 
+                variant="h3" 
+                bold
+                flex={1}
+              >
                 {selectedTab} Content ({currentContent.length})
-              </H1>
-              <TouchableOpacity 
-                style={styles.sortButton}
+              </CText>
+              <CButton
+                title="Sort"
+                variant="ghost"
+                size="small"
                 onPress={() => console.log('Sort content')}
                 accessibilityLabel="Sort content"
-                accessible={true}
-              >
-                <Body style={{ color: colors.textSecondary, fontSize: 12 }}>
-                  Sort
-                </Body>
-                <Ionicons 
-                  name="chevron-down" 
-                  size={16} 
-                  color={colors.textSecondary}
-                />
-              </TouchableOpacity>
-            </View>
+                rightIcon={<CIcon name="chevron-down" size={4} color="textSecondary" />}
+              />
+            </CView>
           )}
 
           {currentContent.length > 0 ? (
             currentContent.map((post, index) => (
-              <AnimatedView
+              <AnimatedCView
                 key={`${selectedTab}-${post.id}`}
                 entering={FadeInUp.delay(index * 100).duration(500)}
                 layout={Layout.springify()}
@@ -282,38 +260,58 @@ export default function LibraryScreen() {
                   author={post.author}
                   onPress={() => console.log('Navigate to post:', post.id)}
                 />
-              </AnimatedView>
+              </AnimatedCView>
             ))
           ) : (
-            <View style={styles.emptyState}>
-              <View style={styles.emptyStateIcon}>
-                <Ionicons 
+            <CView 
+              center 
+              py="xxl"
+            >
+              <CView 
+                width={80}
+                height={80}
+                borderRadius="full"
+                bg="surface"
+                center
+                mb="lg"
+              >
+                <CIcon 
                   name={emptyState.icon} 
-                  size={40} 
-                  color={colors.textSecondary} 
+                  size={8} 
+                  color="textSecondary"
                 />
-              </View>
-              <H1 style={[styles.emptyStateText, { color: colors.text, fontSize: 22 }]}>
+              </CView>
+              <CText 
+                variant="h3" 
+                bold 
+                center
+                mb="sm"
+              >
                 {emptyState.title}
-              </H1>
-              <Body style={[styles.emptyStateSubtext, { color: colors.textSecondary }]}>
+              </CText>
+              <CText 
+                variant="body" 
+                color="textSecondary"
+                center
+                lines={4}
+                mb="xl"
+              >
                 {emptyState.description}
-              </Body>
-              <CustomButton
-                label={emptyState.action}
+              </CText>
+              <CButton
+                title={emptyState.action}
                 onPress={() => console.log('Navigate to explore')}
                 variant="gradient"
                 gradientColors={colors.gradientPrimary}
-                style={{ minWidth: 160 }}
+                size="large"
                 accessibilityLabel={`${emptyState.action} button`}
-                accessible={true}
               />
-            </View>
+            </CView>
           )}
-        </AnimatedView>
+        </AnimatedCView>
 
-        <View style={{ height: 40 }} />
-      </ScrollView>
-    </SafeAreaView>
+        <CView height={40} />
+      </CScrollView>
+    </ScreenWrapper>
   );
 }

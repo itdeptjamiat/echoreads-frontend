@@ -1,15 +1,14 @@
 import React from 'react';
 import {
-  View,
   SafeAreaView,
   KeyboardAvoidingView,
   TouchableWithoutFeedback,
   Keyboard,
   Platform,
-  StyleSheet,
   ViewStyle,
   StatusBar,
 } from 'react-native';
+import { CView } from './core';
 import { useTheme } from '../hooks/useTheme';
 
 interface ScreenWrapperProps {
@@ -45,9 +44,13 @@ export function ScreenWrapper({
 
   // Main content wrapper
   const ContentWrapper = ({ children }: { children: React.ReactNode }) => (
-    <View style={[styles.container, { backgroundColor: bgColor }, style]}>
+    <CView 
+      flex={1} 
+      bg="background" 
+      style={[{ backgroundColor: bgColor }, style] as any}
+    >
       {children}
-    </View>
+    </CView>
   );
 
   // Keyboard dismissing wrapper
@@ -57,19 +60,19 @@ export function ScreenWrapper({
         {children}
       </TouchableWithoutFeedback>
     ) : (
-      <>{children}</>
+      <CView>{children}</CView>
     );
 
   // SafeArea wrapper
   const SafeAreaWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (!safeArea) return <>{children}</>;
+    if (!safeArea) return <CView>{children}</CView>;
 
     return (
-      <View style={{ flex: 1, backgroundColor: bgColor }}>
+      <CView flex={1} bg="background" style={{ backgroundColor: bgColor }}>
         {/* Status bar background for Android */}
         <StatusBar
           backgroundColor={bgColor}
-          barStyle={colors.mode === 'dark' ? 'light-content' : 'dark-content'}
+          barStyle="dark-content"
         />
         
         {/* Top safe area */}
@@ -84,7 +87,7 @@ export function ScreenWrapper({
         {bottomSafeArea && (
           <SafeAreaView style={{ backgroundColor: bgColor }} />
         )}
-      </View>
+      </CView>
     );
   };
 
@@ -92,14 +95,14 @@ export function ScreenWrapper({
   const KeyboardWrapper = ({ children }: { children: React.ReactNode }) =>
     keyboardAvoiding ? (
       <KeyboardAvoidingView
-        style={styles.keyboardAvoid}
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={keyboardVerticalOffset}
       >
         {children}
       </KeyboardAvoidingView>
     ) : (
-      <>{children}</>
+      <CView>{children}</CView>
     );
 
   return (
@@ -112,12 +115,3 @@ export function ScreenWrapper({
     </SafeAreaWrapper>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  keyboardAvoid: {
-    flex: 1,
-  },
-});

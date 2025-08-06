@@ -1,13 +1,29 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { Alert } from 'react-native';
 import { WebView } from 'react-native-webview';
+import { CView, CText, CButton, CIcon } from '../../src/components/core';
+import { Spacing, Radius, Shadow } from '../../src/constants/layout';
 import { useTheme } from '../../src/hooks/useTheme';
-import { H1, Body } from '../../src/theme/Typo';
-import { CustomButton } from '../../src/components/CustomButton';
+import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { router } from 'expo-router';
+import { useDispatch, useSelector } from 'react-redux';
+import { processPayment, completePayment } from '../../src/redux/actions/onboardingActions';
+import { selectAuthData } from '../../src/redux/slices/selectState';
+import { selectSelectedPlan, selectPaymentInProgress, selectPaymentError } from '../../src/redux/selectors/onboardingSelectors';
+import { AppDispatch } from '../../src/redux/store';
+import Animated, { 
+  FadeInDown, 
+  FadeInUp 
+} from 'react-native-reanimated';
 
 export default function CheckoutScreen() {
   const { colors } = useTheme();
+  const dispatch = useDispatch<AppDispatch>();
+  const authData = useSelector(selectAuthData);
+  const selectedPlan = useSelector(selectSelectedPlan);
+  const paymentInProgress = useSelector(selectPaymentInProgress);
+  const paymentError = useSelector(selectPaymentError);
+  
   const [isLoading, setIsLoading] = useState(true);
   const [webViewKey, setWebViewKey] = useState(0);
 
@@ -22,15 +38,29 @@ export default function CheckoutScreen() {
     setIsLoading(false);
   };
 
-  const handleWebViewMessage = (event: any) => {
+  const handleWebViewMessage = async (event: any) => {
     const data = event.nativeEvent.data;
     
     try {
       const message = JSON.parse(data);
       
       if (message.type === 'payment_success') {
-        // Payment successful - navigate to confirmation
-        router.push('/(onboarding)/confirmation');
+        // Process payment success
+        if (authData?.user?._id && selectedPlan) {
+          try {
+            await dispatch(processPayment({
+              planId: selectedPlan,
+              userId: authData.user._id,
+              paymentMethod: message.paymentMethod || 'stripe',
+              amount: message.amount || 0,
+            })).unwrap();
+            
+            dispatch(completePayment());
+            router.push('/(onboarding)/confirmation');
+          } catch (error: any) {
+            Alert.alert('Payment Error', error || 'Failed to process payment');
+          }
+        }
       } else if (message.type === 'payment_cancelled') {
         // Payment cancelled - go back to plan selection
         router.back();
@@ -62,81 +92,52 @@ export default function CheckoutScreen() {
     setWebViewKey(prev => prev + 1);
   };
 
-  const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      backgroundColor: colors.background,
-    },
-    header: {
-      flexDirection: 'row',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      paddingHorizontal: 24,
-      paddingVertical: 16,
-      borderBottomWidth: 1,
-      borderBottomColor: colors.border,
-    },
-    headerTitle: {
-      color: colors.text,
-    },
-    headerButtons: {
-      flexDirection: 'row',
-      gap: 12,
-    },
-    webViewContainer: {
-      flex: 1,
-    },
-    loadingContainer: {
-      position: 'absolute',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      justifyContent: 'center',
-      alignItems: 'center',
-      backgroundColor: colors.background,
-    },
-    loadingText: {
-      color: colors.textSecondary,
-      marginTop: 16,
-    },
-    footer: {
-      paddingHorizontal: 24,
-      paddingVertical: 16,
-      borderTopWidth: 1,
-      borderTopColor: colors.border,
-      backgroundColor: colors.card,
-    },
-    footerText: {
-      textAlign: 'center',
-      color: colors.textSecondary,
-      marginBottom: 8,
-    },
-  });
-
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <H1 style={styles.headerTitle}>Checkout</H1>
-        <View style={styles.headerButtons}>
-          <CustomButton
-            label="Back"
-            variant="ghost"
-            onPress={handleBack}
-            accessibilityLabel="Go back to plan selection"
-            accessible={true}
-          />
-          <CustomButton
-            label="Refresh"
-            variant="ghost"
-            onPress={handleRefresh}
-            accessibilityLabel="Refresh checkout page"
-            accessible={true}
-          />
-        </View>
-      </View>
+    <ScreenWrapper
+      safeArea={true}
+      keyboardAvoiding={false}
+    >
+      {/* Header */}
+      <Animated.View entering={FadeInDown.duration(600)}>
+        <CView 
+          row 
+          justify="between" 
+          align="center"
+          px="lg"
+          py="md"
+          borderBottomWidth={1}
+          borderBottomColor="border"
+        >
+          <CText 
+            variant="h2" 
+            bold
+          >
+            Checkout
+          </CText>
+          <CView 
+            row 
+            style={{ gap: Spacing.md }}
+          >
+            <CButton
+              title="Back"
+              variant="ghost"
+              size="small"
+              onPress={handleBack}
+              accessibilityLabel="Go back to plan selection"
+            />
+            <CButton
+              title="Refresh"
+              variant="ghost"
+              size="small"
+              onPress={handleRefresh}
+              accessibilityLabel="Refresh checkout page"
+            />
+          </CView>
+        </CView>
+      </Animated.View>
 
-      <View style={styles.webViewContainer}>
+      {/* WebView Container */}
+      <CView flex={1}>
         <WebView
           key={webViewKey}
           source={{ uri: stripeCheckoutUrl }}
@@ -150,24 +151,66 @@ export default function CheckoutScreen() {
           allowsInlineMediaPlayback={true}
           mediaPlaybackRequiresUserAction={false}
           accessibilityLabel="Stripe checkout form"
-          accessible={true}
         />
         
         {isLoading && (
-          <View style={styles.loadingContainer}>
-            <Body style={styles.loadingText}>Loading checkout...</Body>
-          </View>
+          <Animated.View 
+            entering={FadeInUp.duration(400)}
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: colors.background,
+            }}
+          >
+            <CView center>
+              <CIcon 
+                name="card-outline" 
+                size={12} 
+                color="primary"
+                mb="md"
+              />
+              <CText 
+                variant="bodyLarge" 
+                color="textSecondary"
+              >
+                Loading checkout...
+              </CText>
+            </CView>
+          </Animated.View>
         )}
-      </View>
+      </CView>
 
-      <View style={styles.footer}>
-        <Body style={styles.footerText}>
-          Secure checkout powered by Stripe
-        </Body>
-        <Body style={styles.footerText}>
-          Your payment information is encrypted and secure
-        </Body>
-      </View>
-    </View>
+      {/* Footer */}
+      <Animated.View entering={FadeInUp.delay(200).duration(600)}>
+        <CView 
+          px="lg"
+          py="md"
+          borderTopWidth={1}
+          borderTopColor="border"
+          bg="card"
+        >
+          <CText 
+            variant="bodySmall" 
+            color="textSecondary"
+            center
+            mb="xs"
+          >
+            Secure checkout powered by Stripe
+          </CText>
+          <CText 
+            variant="bodySmall" 
+            color="textSecondary"
+            center
+          >
+            Your payment information is encrypted and secure
+          </CText>
+        </CView>
+      </Animated.View>
+    </ScreenWrapper>
   );
 } 

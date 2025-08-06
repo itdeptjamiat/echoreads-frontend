@@ -5,18 +5,28 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 // Import reducers
 import authReducer from './slices/authSlice';
 import ordersReducer from './slices/ordersSlice';
+import onboardingReducer from './slices/onboardingSlice';
+import uiReducer from './slices/uiSlice';
+import magazinesReducer from './slices/magazinesSlice';
+import articlesReducer from './slices/articlesSlice';
+import digestsReducer from './slices/digestsSlice';
 
 // Redux persist configuration
 const persistConfig = {
   key: 'root',
   storage: AsyncStorage,
-  whitelist: ['auth'], // Only persist auth state
+  whitelist: ['auth', 'onboarding'], // Persist auth and onboarding state
 };  
 
 // Combine reducers
 const rootReducer = combineReducers({
   auth: authReducer,
   orders: ordersReducer,
+  onboarding: onboardingReducer,
+  ui: uiReducer,
+  magazines: magazinesReducer,
+  articles: articlesReducer,
+  digests: digestsReducer,
 });
 
 // Create persisted reducer
