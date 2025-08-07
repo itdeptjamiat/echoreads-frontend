@@ -15,9 +15,9 @@ export const lightColors = {
   warning: '#f59e0b',
   info: '#06b6d4',
   shadow: 'rgba(0, 0, 0, 0.1)',
-  gradientPrimary: ['#3b82f6', '#1d4ed8'],
-  gradientSecondary: ['#8b5cf6', '#7c3aed'],
-  gradientAccent: ['#06b6d4', '#0891b2'],
+  gradientPrimary: ['#3b82f6', '#1d4ed8'] as const,
+  gradientSecondary: ['#8b5cf6', '#7c3aed'] as const,
+  gradientAccent: ['#06b6d4', '#0891b2'] as const,
 };
 
 export const darkColors = {
@@ -37,9 +37,9 @@ export const darkColors = {
   warning: '#f59e0b',
   info: '#06b6d4',
   shadow: 'rgba(0, 0, 0, 0.3)',
-  gradientPrimary: ['#3b82f6', '#1d4ed8'],
-  gradientSecondary: ['#8b5cf6', '#7c3aed'],
-  gradientAccent: ['#06b6d4', '#0891b2'],
+  gradientPrimary: ['#3b82f6', '#1d4ed8'] as const,
+  gradientSecondary: ['#8b5cf6', '#7c3aed'] as const,
+  gradientAccent: ['#06b6d4', '#0891b2'] as const,
 };
 
 // Legacy support for existing components

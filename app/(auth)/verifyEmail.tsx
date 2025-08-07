@@ -7,6 +7,7 @@ import { FormProvider, TextField, useFormContext } from '../../src/form';
 import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { verifyEmailSchema, VerifyEmailFormData } from '../../src/form/schemas/authSchema';
 import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../src/redux/store';
 import { confirmEmail } from '../../src/redux/actions/authActions';
 import { router } from 'expo-router';
 import Animated, { 
@@ -17,8 +18,8 @@ import Animated, {
 export default function VerifyEmailScreen() {
   const { colors } = useTheme();
 
-  const dispatch = useDispatch();
-  const handleSubmit = async (data) => {
+  const dispatch = useDispatch<AppDispatch>();
+  const handleSubmit = async (data: VerifyEmailFormData) => {
     try {
       const payload = {
         email: data.email,
@@ -28,7 +29,8 @@ export default function VerifyEmailScreen() {
       Alert.alert('Success', 'Email verified successfully');
       router.push('/(auth)/');
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to verify email');
+      const message = error instanceof Error ? error.message : 'Failed to verify email';
+      Alert.alert('Error', message);
     }
   };
 

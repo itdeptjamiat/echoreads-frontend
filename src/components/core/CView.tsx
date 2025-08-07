@@ -1,10 +1,10 @@
 import React from 'react';
-import { View, ViewProps, ViewStyle } from 'react-native';
+import { View, ViewStyle, TouchableOpacity, TouchableOpacityProps, StyleProp } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
 import { useTheme } from '../../hooks/useTheme';
 import { Spacing, Radius, Shadow } from '../../constants/layout';
 
-interface CViewProps extends ViewProps {
+export interface CViewProps extends TouchableOpacityProps {
   children?: React.ReactNode;
   
   // Responsive sizing
@@ -12,9 +12,22 @@ interface CViewProps extends ViewProps {
   height?: number | string;
   widthPercent?: number; // 0-100, will use wp()
   heightPercent?: number; // 0-100, will use hp()
+  minHeight?: number;
   
   // Theme-aware background
-  bg?: 'primary' | 'secondary' | 'card' | 'background' | 'surface' | 'transparent';
+  bg?:
+    | 'primary'
+    | 'secondary'
+    | 'card'
+    | 'background'
+    | 'surface'
+    | 'transparent'
+    | 'success'
+    | 'warning'
+    | 'danger'
+    | 'muted'
+    | 'border'
+    | string;
   
   // Spacing using layout constants
   p?: keyof typeof Spacing | number; // padding
@@ -39,6 +52,13 @@ interface CViewProps extends ViewProps {
   row?: boolean; // Flex direction row
   justify?: 'flex-start' | 'flex-end' | 'center' | 'space-between' | 'space-around' | 'space-evenly';
   align?: 'flex-start' | 'flex-end' | 'center' | 'stretch' | 'baseline';
+  overflow?: ViewStyle['overflow'];
+  pressable?: boolean;
+  position?: ViewStyle['position'];
+  top?: number;
+  left?: number;
+  right?: number;
+  bottom?: number;
   
   // Borders
   borderRadius?: keyof typeof Radius | number;
@@ -50,13 +70,14 @@ interface CViewProps extends ViewProps {
   elevation?: number;
   
   // Style override
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function CView({
   children,
   width,
   height,
+  minHeight,
   widthPercent,
   heightPercent,
   bg,
@@ -79,13 +100,21 @@ export function CView({
   row,
   justify,
   align,
+  overflow,
+  position,
+  top,
+  left,
+  right,
+  bottom,
   borderRadius,
   borderWidth,
   borderColor,
   shadow,
   elevation,
+  pressable,
+  onPress,
   style,
-  ...props
+  ...rest
 }: CViewProps) {
   const { colors } = useTheme();
 
@@ -101,10 +130,20 @@ export function CView({
         return colors.background;
       case 'surface':
         return colors.muted;
+      case 'success':
+        return colors.success;
+      case 'warning':
+        return colors.warning;
+      case 'danger':
+        return colors.danger;
+      case 'muted':
+        return colors.muted;
+      case 'border':
+        return colors.border;
       case 'transparent':
         return 'transparent';
       default:
-        return undefined;
+        return bg; // allow custom colors
     }
   };
 
@@ -138,10 +177,13 @@ export function CView({
     return height;
   };
 
+  const shadowStyle = getShadowStyle();
+
   const dynamicStyles: ViewStyle = {
     backgroundColor: getBackgroundColor(),
-    width: getWidth(),
-    height: getHeight(),
+    width: getWidth() as any,
+    height: getHeight() as any,
+    minHeight,
     
     // Padding
     padding: getSpacingValue(p),
@@ -166,6 +208,12 @@ export function CView({
     justifyContent: center ? 'center' : justify,
     alignItems: center ? 'center' : align,
     flexDirection: row ? 'row' : 'column',
+    overflow: overflow,
+    position,
+    top,
+    left,
+    right,
+    bottom,
     
     // Borders
     borderRadius: getRadiusValue(borderRadius),
@@ -173,12 +221,20 @@ export function CView({
     borderColor: borderColor || colors.border,
     
     // Shadows
-    ...getShadowStyle(),
-    elevation: elevation !== undefined ? elevation : (shadow ? getShadowStyle().elevation : 0),
+    ...shadowStyle,
+    elevation: elevation !== undefined ? elevation : (shadow ? (shadowStyle as any).elevation || 0 : 0),
   };
 
+  if (pressable || onPress) {
+    return (
+      <TouchableOpacity style={[dynamicStyles, style]} onPress={onPress} {...rest}>
+        {children}
+      </TouchableOpacity>
+    );
+  }
+
   return (
-    <View style={[dynamicStyles, style]} {...props}>
+    <View style={[dynamicStyles, style]} {...rest}>
       {children}
     </View>
   );

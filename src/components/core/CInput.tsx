@@ -5,7 +5,7 @@ import { useTheme } from '../../hooks/useTheme';
 import { CView } from './CView';
 import { CText } from './CText';
 
-interface CInputProps extends TextInputProps {
+export interface CInputProps extends TextInputProps {
   // Label and placeholder
   label?: string;
   placeholder?: string;

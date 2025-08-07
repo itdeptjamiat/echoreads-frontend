@@ -7,8 +7,9 @@ import { FormProvider, TextField, useFormContext } from '../../src/form';
 import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { resetPasswordSchema, ResetPasswordFormData } from '../../src/form/schemas/authSchema';
 import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../src/redux/store';
 import { resetPassword } from '../../src/redux/actions/authActions';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import Animated, { 
   FadeInDown, 
   FadeInUp 
@@ -17,16 +18,20 @@ import Animated, {
 export default function ResetPasswordScreen() {
   const { colors } = useTheme();
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
+  const { email = '', otp = '' } = useLocalSearchParams<{
+    email?: string;
+    otp?: string;
+  }>();
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  
+
   // Update handleSubmit to map data
-  const handleSubmit = async (data) => {
+  const handleSubmit = async (data: ResetPasswordFormData) => {
     try {
       const payload = {
-        email: data.email, // Assume email is in form or from params
-        otp: data.otp,
+        email: String(email),
+        otp: String(otp),
         newPassword: data.newPassword,
         confirmPassword: data.confirmNewPassword
       };
@@ -34,7 +39,8 @@ export default function ResetPasswordScreen() {
       Alert.alert('Success', 'Password reset successful');
       router.push('/(auth)/');
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to reset password');
+      const message = error instanceof Error ? error.message : 'Failed to reset password';
+      Alert.alert('Error', message);
     }
   };
 
