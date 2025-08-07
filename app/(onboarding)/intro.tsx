@@ -7,6 +7,7 @@ import { useTheme } from '../../src/hooks/useTheme';
 import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { router } from 'expo-router';
 import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../src/redux/store';
 import { markIntroSeen, completeIntro } from '../../src/redux/slices/onboardingSlice';
 import Animated, { 
   FadeInDown, 
@@ -23,7 +24,7 @@ interface IntroSlide {
   subtitle: string;
   description: string;
   icon: string;
-  gradient: string[];
+  gradient: readonly [string, string];
 }
 
 const introSlides: IntroSlide[] = [
@@ -33,7 +34,7 @@ const introSlides: IntroSlide[] = [
     subtitle: 'Your Digital Reading Companion',
     description: 'Discover thousands of magazines, articles, and daily digests curated just for you. Experience reading like never before.',
     icon: 'book-outline',
-    gradient: ['#3b82f6', '#1d4ed8']
+    gradient: ['#3b82f6', '#1d4ed8'] as const
   },
   {
     id: '2',
@@ -41,7 +42,7 @@ const introSlides: IntroSlide[] = [
     subtitle: 'Tailored to Your Interests',
     description: 'Our AI learns what you love to read and suggests content that matches your preferences and reading habits.',
     icon: 'heart-outline',
-    gradient: ['#8b5cf6', '#7c3aed']
+    gradient: ['#8b5cf6', '#7c3aed'] as const
   },
   {
     id: '3',
@@ -49,7 +50,7 @@ const introSlides: IntroSlide[] = [
     subtitle: 'Offline Reading Made Simple',
     description: 'Download your favorite content and read offline. Perfect for commutes, flights, or anywhere without internet.',
     icon: 'download-outline',
-    gradient: ['#06b6d4', '#0891b2']
+    gradient: ['#06b6d4', '#0891b2'] as const
   },
   {
     id: '4',
@@ -57,13 +58,13 @@ const introSlides: IntroSlide[] = [
     subtitle: 'Join Millions of Readers',
     description: 'Ready to explore the world of premium digital content? Create your account and begin your reading adventure.',
     icon: 'rocket-outline',
-    gradient: ['#10b981', '#059669']
+    gradient: ['#10b981', '#059669'] as const
   }
 ];
 
 export default function IntroScreen() {
   const { colors } = useTheme();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef<FlatList>(null);
 
@@ -231,9 +232,9 @@ export default function IntroScreen() {
         <Animated.View entering={FadeInUp.delay(600).springify()}>
           {renderDots()}
           
-          <CView 
-            row 
-            justify="between" 
+          <CView
+            row
+            justify="space-between"
             align="center"
             style={{ gap: Spacing.md }}
           >

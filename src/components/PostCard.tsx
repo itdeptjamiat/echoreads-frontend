@@ -1,7 +1,7 @@
 import React from 'react';
 import { Image, Dimensions } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
-import { CView, CText, CIcon } from './core';
+import { CView, CText, CIcon, CViewProps } from './core';
 import { Spacing, Radius, Shadow } from '../constants/layout';
 import { useTheme } from '../hooks/useTheme';
 import Animated, { 
@@ -77,20 +77,20 @@ export function PostCard({
     onPress?.();
   };
 
-  const getCardStyle = () => {
-    const baseStyle = {
+  const getCardStyle = (): CViewProps => {
+    const baseStyle: CViewProps = {
       bg: 'card',
       borderRadius: variant === 'featured' ? 'xl' : 'lg',
       mx: 'lg',
       my: 'sm',
       shadow: variant === 'featured' ? 'lg' : 'md',
-      overflow: 'hidden' as const,
+      overflow: 'hidden',
     };
 
     if (variant === 'featured') {
       return {
         ...baseStyle,
-        width: screenWidth - (Spacing.lg * 2),
+        width: screenWidth - Spacing.lg * 2,
         height: 240,
       };
     }
@@ -192,10 +192,10 @@ export function PostCard({
         </CText>
         
         <CView 
-          row 
-          justify="between" 
+          row
+          justify="space-between"
           align="center"
-          mt="auto"
+          style={{ marginTop: 'auto' }}
         >
           {author && (
             <CText 

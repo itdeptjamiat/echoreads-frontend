@@ -10,7 +10,7 @@ import Animated, {
   useSharedValue 
 } from 'react-native-reanimated';
 
-interface CButtonProps extends TouchableOpacityProps {
+export interface CButtonProps extends TouchableOpacityProps {
   children?: React.ReactNode;
   title?: string;
   
@@ -34,7 +34,7 @@ interface CButtonProps extends TouchableOpacityProps {
   disabled?: boolean;
   
   // Gradient colors (for gradient variant)
-  gradientColors?: string[];
+  gradientColors?: readonly string[];
   
   // Spacing
   marginTop?: number;
@@ -92,7 +92,7 @@ export function CButton({
       scale.value = withSpring(1, { duration: 150 });
     });
     
-    onPress?.();
+    (onPress as any)?.();
   };
 
   const getSizeConfig = () => {
@@ -206,8 +206,8 @@ export function CButton({
     }
   };
 
-  const getGradientColors = () => {
-    if (gradientColors) return gradientColors;
+  const getGradientColors = (): readonly [string, string] => {
+    if (gradientColors) return gradientColors as readonly [string, string];
     return colors.gradientPrimary;
   };
 
@@ -254,7 +254,7 @@ export function CButton({
 
   return (
     <TouchableOpacity
-      style={[buttonStyles, style, animatedStyle]}
+      style={[buttonStyles, style, animatedStyle] as any}
       onPress={handlePress}
       disabled={disabled || loading}
       activeOpacity={0.85}
@@ -262,7 +262,7 @@ export function CButton({
     >
       {variant === 'gradient' && (
         <LinearGradient
-          colors={getGradientColors()}
+          colors={getGradientColors() as [string, string]}
           style={StyleSheet.absoluteFillObject}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}

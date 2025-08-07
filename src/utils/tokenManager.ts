@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { attachAuthToken, removeAuthToken } from '../axios';
+import { attachAuthToken } from '../axios';
 
 // Token storage keys
 const TOKEN_KEY = 'auth-token';
@@ -36,7 +36,7 @@ export const loadAndAttachToken = async (): Promise<string | null> => {
 export const clearToken = async () => {
   try {
     await AsyncStorage.multiRemove([TOKEN_KEY, REFRESH_TOKEN_KEY]);
-    removeAuthToken();
+    attachAuthToken(null);
     console.log('🗑️ Token cleared');
   } catch (error) {
     console.error('Error clearing token:', error);

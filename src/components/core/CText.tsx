@@ -4,7 +4,7 @@ import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-nat
 import { useTheme } from '../../hooks/useTheme';
 import { FontSize, Spacing } from '../../constants/layout';
 
-interface CTextProps extends TextProps {
+export interface CTextProps extends TextProps {
   children: React.ReactNode;
   
   // Typography variants using layout constants
@@ -19,6 +19,9 @@ interface CTextProps extends TextProps {
   
   // Colors
   color?: 'primary' | 'secondary' | 'text' | 'textSecondary' | 'success' | 'warning' | 'danger' | string;
+
+  // Flex
+  flex?: number;
   
   // Alignment
   center?: boolean;
@@ -53,6 +56,7 @@ export function CText({
   weight,
   bold,
   color = 'text',
+  flex,
   center,
   right,
   mt,
@@ -152,6 +156,7 @@ export function CText({
     fontWeight: getFontWeight() as any,
     color: getTextColor(),
     textAlign: getTextAlign() as 'left' | 'center' | 'right',
+    flex,
     
     // Margins using layout constants
     marginTop: getSpacingValue(mt),

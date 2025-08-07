@@ -9,7 +9,7 @@ import Animated, {
   useSharedValue 
 } from 'react-native-reanimated';
 
-interface CCardProps extends TouchableOpacityProps {
+export interface CCardProps extends TouchableOpacityProps {
   children: React.ReactNode;
   
   // Card variants
@@ -44,7 +44,7 @@ interface CCardProps extends TouchableOpacityProps {
   backgroundColor?: string;
   
   // Gradient (for gradient variant)
-  gradientColors?: string[];
+  gradientColors?: readonly string[];
   gradientDirection?: { x: number; y: number }[];
   
   // Interaction
@@ -206,8 +206,8 @@ export function CCard({
     }
   };
 
-  const getGradientColors = () => {
-    if (gradientColors) return gradientColors;
+  const getGradientColors = (): readonly [string, string] => {
+    if (gradientColors) return gradientColors as readonly [string, string];
     return colors.gradientPrimary;
   };
 
@@ -222,17 +222,17 @@ export function CCard({
   const cardProps = pressable ? {
     onPress: handlePress,
     activeOpacity: 0.9,
-    style: animatePress ? [cardStyles, style, animatedStyle] : [cardStyles, style],
+    style: (animatePress ? [cardStyles, style, animatedStyle] : [cardStyles, style]) as any,
     ...props
   } : {
-    style: [cardStyles, style]
+    style: [cardStyles, style] as any
   };
 
   return (
     <CardComponent {...cardProps}>
       {variant === 'gradient' && (
         <LinearGradient
-          colors={getGradientColors()}
+          colors={getGradientColors() as [string, string]}
           start={getGradientDirection()[0]}
           end={getGradientDirection()[1]}
           style={{

@@ -12,9 +12,9 @@ export { CScrollView } from './CScrollView';
 export { CFlatList } from './CFlatList';
 
 // Re-export types for convenience
-export type { default as CViewProps } from './CView';
-export type { default as CTextProps } from './CText';
-export type { default as CButtonProps } from './CButton';
-export type { default as CInputProps } from './CInput';
-export type { default as CCardProps } from './CCard';
-export type { default as CIconProps } from './CIcon';
+export type { CViewProps } from './CView';
+export type { CTextProps } from './CText';
+export type { CButtonProps } from './CButton';
+export type { CInputProps } from './CInput';
+export type { CCardProps } from './CCard';
+export type { CIconProps } from './CIcon';
