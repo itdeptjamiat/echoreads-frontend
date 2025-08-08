@@ -54,7 +54,7 @@ export default function OnboardingLayout() {
         gestureEnabled: false, // Prevent swipe back during onboarding
       }}
     >
-      <Stack.Screen name="index" />
+      <Stack.Screen name="intro" />
       <Stack.Screen name="choosePlan" />
       <Stack.Screen name="checkout" />
       <Stack.Screen name="confirmation" />
