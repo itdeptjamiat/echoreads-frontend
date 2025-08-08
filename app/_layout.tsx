@@ -9,9 +9,9 @@ import { attachAuthToken } from '../src/axios/EchoInstance';
 
 const AppLayout = () => {
   return (
-    <Provider store={store}>
-      <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor}>
+          <ThemeProvider>
           <Navigation />
         </ThemeProvider>
       </PersistGate>
@@ -32,8 +32,8 @@ const Navigation = () => {
           router.replace('/(tabs)/');
         } else {
           attachAuthToken(null);
-          console.log('⚠️ No token found, navigating to onboarding');
-          router.replace('/(onboarding)/intro');
+          console.log('⚠️ No token found, navigating to auth');
+          router.replace('/(auth)/');
         }
       } catch (error) {
         console.error('Error handling auth token:', error);
@@ -44,12 +44,13 @@ const Navigation = () => {
   }, [token, router]);
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-      <Stack.Screen name="(auth)" />
-      <Stack.Screen name="(onboarding)" />
-      <Stack.Screen name="(tabs)" />
-    </Stack>
+            <Stack screenOptions={{ headerShown: false }}>
+              {/* Index does the auth gate */}
+              <Stack.Screen name="index" />
+              {/* Route groups for auth and tabs */}
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(tabs)" />
+            </Stack>
   );
 };
 

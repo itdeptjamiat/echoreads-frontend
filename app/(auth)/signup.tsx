@@ -141,8 +141,8 @@ export default function SignupScreen() {
         name: data.email.trim().split('@')[0],
       })).unwrap();
       
-      // Navigate to subscription page after successful signup
-      router.push('/(onboarding)/choosePlan');
+      // Navigate to main app after successful signup
+      router.push('/(tabs)/');
     } catch (error: any) {
       // Shake animation on error
       shakeAnimation.value = withSequence(

@@ -11,11 +11,5 @@ export const API_URLS = {
     resetPassword: `${VERSION}/user/set-new-password-after-otp`,
     profile: (userId: string) => `${VERSION}/user/profile/${userId}`,
   },
-  onboarding: {
-    selectPlan: `${VERSION}/onboarding/select-plan`,
-    processPayment: `${VERSION}/onboarding/process-payment`,
-    savePreferences: `${VERSION}/onboarding/save-preferences`,
-    complete: `${VERSION}/onboarding/complete`,
-    getStatus: (userId: string) => `${VERSION}/onboarding/status/${userId}`,
-  },
+
 };

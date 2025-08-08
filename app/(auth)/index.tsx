@@ -135,17 +135,8 @@ export default function LoginScreen() {
 
       console.log("Login successful:", result);
       
-      // Navigate based on user's plan
-      if (result.user?.plan === 'free') {
-        // User has free plan, go directly to main app
-        router.push("/(tabs)/");
-      } else if (result.user?.plan && result.user.plan !== 'free') {
-        // User has a paid plan, go to main app
-        router.push("/(tabs)/");
-      } else {
-        // No plan or new user, go to plan selection
-        router.push("/(onboarding)/choosePlan");
-      }
+      // Navigate to main app after successful login
+      router.push("/(tabs)/");
     } catch (error: any) {
       console.error("Login error:", error);
       Alert.alert("Login Failed", error || "An error occurred during login");
