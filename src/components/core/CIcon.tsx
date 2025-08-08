@@ -1,13 +1,14 @@
 import React from 'react';
 import { TouchableOpacity, TouchableOpacityProps } from 'react-native';
 import { heightPercentageToDP as hp, widthPercentageToDP as wp } from 'react-native-responsive-screen';
+import { Spacing } from '../../constants/layout';
 import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../hooks/useTheme';
 import { CView } from './CView';
 
-interface CIconProps extends TouchableOpacityProps {
+export interface CIconProps extends TouchableOpacityProps {
   // Icon name (Ionicons)
-  name: keyof typeof Ionicons.glyphMap;
+  name: keyof typeof Ionicons.glyphMap | string;
   
   // Size
   size?: number; // Will use wp() for responsive sizing
@@ -21,10 +22,14 @@ interface CIconProps extends TouchableOpacityProps {
   bgSize?: number; // Background circle size, will use wp()
   
   // Spacing
-  marginTop?: number;
-  marginBottom?: number;
-  marginLeft?: number;
-  marginRight?: number;
+  marginTop?: keyof typeof Spacing | number;
+  marginBottom?: keyof typeof Spacing | number;
+  marginLeft?: keyof typeof Spacing | number;
+  marginRight?: keyof typeof Spacing | number;
+  mt?: keyof typeof Spacing | number;
+  mb?: keyof typeof Spacing | number;
+  ml?: keyof typeof Spacing | number;
+  mr?: keyof typeof Spacing | number;
   
   // Interaction
   onPress?: () => void;
@@ -49,6 +54,10 @@ export function CIcon({
   marginBottom,
   marginLeft,
   marginRight,
+  mt,
+  mb,
+  ml,
+  mr,
   onPress,
   pressable = !!onPress,
   shadow,
@@ -136,11 +145,17 @@ export function CIcon({
     return getIconSize() * 1.8;
   };
 
+  const getSpacingValue = (value: keyof typeof Spacing | number | undefined, horizontal = false) => {
+    if (value === undefined) return 0;
+    if (typeof value === 'number') return horizontal ? wp(value) : hp(value);
+    return Spacing[value];
+  };
+
   const containerStyles = {
-    marginTop: marginTop ? hp(marginTop) : 0,
-    marginBottom: marginBottom ? hp(marginBottom) : 0,
-    marginLeft: marginLeft ? wp(marginLeft) : 0,
-    marginRight: marginRight ? wp(marginRight) : 0,
+    marginTop: getSpacingValue(marginTop ?? mt),
+    marginBottom: getSpacingValue(marginBottom ?? mb),
+    marginLeft: getSpacingValue(marginLeft ?? ml, true),
+    marginRight: getSpacingValue(marginRight ?? mr, true),
   };
 
   const backgroundStyles = bg ? {
@@ -161,7 +176,7 @@ export function CIcon({
 
   const iconElement = (
     <Ionicons
-      name={name}
+      name={name as any}
       size={getIconSize()}
       color={getIconColor()}
     />
@@ -181,7 +196,7 @@ export function CIcon({
   }
 
   return (
-    <CView style={[containerStyles, bg ? backgroundStyles : {}, style]}>
+    <CView style={[containerStyles, bg ? backgroundStyles : {}, style as any]}>
       {iconElement}
     </CView>
   );

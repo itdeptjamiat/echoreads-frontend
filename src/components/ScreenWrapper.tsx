@@ -60,12 +60,12 @@ export function ScreenWrapper({
         {children}
       </TouchableWithoutFeedback>
     ) : (
-      <CView>{children}</CView>
+      <CView flex={1}>{children}</CView>
     );
 
   // SafeArea wrapper
   const SafeAreaWrapper = ({ children }: { children: React.ReactNode }) => {
-    if (!safeArea) return <CView>{children}</CView>;
+    if (!safeArea) return <CView flex={1}>{children}</CView>;
 
     return (
       <CView flex={1} bg="background" style={{ backgroundColor: bgColor }}>
@@ -102,7 +102,7 @@ export function ScreenWrapper({
         {children}
       </KeyboardAvoidingView>
     ) : (
-      <CView>{children}</CView>
+      <CView flex={1}>{children}</CView>
     );
 
   return (

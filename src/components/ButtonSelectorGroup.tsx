@@ -27,8 +27,8 @@ export function ButtonSelectorGroup({
   const { colors } = useTheme();
   const scale = useSharedValue(1);
 
-  const getGradientColors = (option: string, isSelected: boolean) => {
-    if (!isSelected || variant !== 'gradient') return [colors.card, colors.card];
+  const getGradientColors = (option: string, isSelected: boolean): readonly [string, string] => {
+    if (!isSelected || variant !== 'gradient') return [colors.card, colors.card] as const;
     
     switch (option.toLowerCase()) {
       case 'magazines':
@@ -84,7 +84,7 @@ export function ButtonSelectorGroup({
             accessibilityLabel={`${option} button`}
           >
             <LinearGradient
-              colors={isSelected && variant === 'gradient' ? gradientColors : [colors.card, colors.card]}
+              colors={isSelected && variant === 'gradient' ? gradientColors : ([colors.card, colors.card] as const)}
               style={{
                 position: 'absolute',
                 top: 0,

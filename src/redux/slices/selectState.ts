@@ -30,7 +30,7 @@ export const selectAuthError = createSelector(
 
 export const selectUserId = createSelector(
   [selectAuthUser],
-  (user) => user?.id
+  (user) => user?._id
 );
 
 export const selectUserEmail = createSelector(

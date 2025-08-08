@@ -12,7 +12,7 @@ export const selectToken = createSelector(
 
 export const selectUserId = createSelector(
   [selectAuthState],
-  (auth) => auth.data?.user?.id
+  (auth) => auth.data?.user?._id
 );
 
 export const selectUser = createSelector(
@@ -37,7 +37,7 @@ export const selectIsAuthenticated = createSelector(
 
 export const selectIsEmailVerified = createSelector(
   [selectAuthState],
-  (auth) => auth.data?.user?.verified || false
+  (auth) => auth.data?.user?.isVerified || false
 );
 
 // Computed/derived selectors with memoization

@@ -7,7 +7,8 @@ import { useTheme } from '../../src/hooks/useTheme';
 import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { router } from 'expo-router';
 import { useDispatch, useSelector } from 'react-redux';
-import { processPayment, completePayment } from '../../src/redux/actions/onboardingActions';
+import { processPayment } from '../../src/redux/actions/onboardingActions';
+import { completePayment } from '../../src/redux/slices/onboardingSlice';
 import { selectAuthData } from '../../src/redux/slices/selectState';
 import { selectSelectedPlan, selectPaymentInProgress, selectPaymentError } from '../../src/redux/selectors/onboardingSelectors';
 import { AppDispatch } from '../../src/redux/store';
@@ -99,14 +100,13 @@ export default function CheckoutScreen() {
     >
       {/* Header */}
       <Animated.View entering={FadeInDown.duration(600)}>
-        <CView 
-          row 
-          justify="between" 
+        <CView
+          row
+          justify="space-between"
           align="center"
           px="lg"
           py="md"
-          borderBottomWidth={1}
-          borderBottomColor="border"
+          style={{ borderBottomWidth: 1, borderBottomColor: colors.border }}
         >
           <CText 
             variant="h2" 
@@ -114,10 +114,7 @@ export default function CheckoutScreen() {
           >
             Checkout
           </CText>
-          <CView 
-            row 
-            style={{ gap: Spacing.md }}
-          >
+          <CView row style={{ gap: Spacing.md }}>
             <CButton
               title="Back"
               variant="ghost"
@@ -187,12 +184,11 @@ export default function CheckoutScreen() {
 
       {/* Footer */}
       <Animated.View entering={FadeInUp.delay(200).duration(600)}>
-        <CView 
+        <CView
           px="lg"
           py="md"
-          borderTopWidth={1}
-          borderTopColor="border"
           bg="card"
+          style={{ borderTopWidth: 1, borderTopColor: colors.border }}
         >
           <CText 
             variant="bodySmall" 

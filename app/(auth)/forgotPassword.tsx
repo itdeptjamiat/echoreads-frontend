@@ -7,6 +7,7 @@ import { FormProvider, TextField, useFormContext } from '../../src/form';
 import { ScreenWrapper } from '../../src/components/ScreenWrapper';
 import { forgotPasswordSchema, ForgotPasswordFormData } from '../../src/form/schemas/authSchema';
 import { useDispatch } from 'react-redux';
+import { AppDispatch } from '../../src/redux/store';
 import { forgotPassword } from '../../src/redux/actions/authActions';
 import { router } from 'expo-router';
 import Animated, { 
@@ -17,14 +18,15 @@ import Animated, {
 export default function ForgotPasswordScreen() {
   const { colors } = useTheme();
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const handleSubmit = async (data: ForgotPasswordFormData) => {
     try {
       await dispatch(forgotPassword(data)).unwrap();
       Alert.alert('Success', 'Password reset link sent to your email');
       router.push('/(auth)/verifyEmail'); // Assuming verification is needed
     } catch (error) {
-      Alert.alert('Error', error.message || 'Failed to send reset link');
+      const message = error instanceof Error ? error.message : 'Failed to send reset link';
+      Alert.alert('Error', message);
     }
   };
 
