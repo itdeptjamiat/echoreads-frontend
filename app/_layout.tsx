@@ -1,11 +1,12 @@
 import React, { useEffect } from 'react';
 import { Stack, useRouter } from 'expo-router';
-import { Provider, useSelector, useDispatch } from 'react-redux';
+import { Provider, useSelector } from 'react-redux';
 import { store, persistor } from '../src/redux/store';
 import { ThemeProvider } from '../src/theme/ThemeContext';
 import { PersistGate } from 'redux-persist/integration/react';
 import { selectToken } from '../src/redux/slices/selectState';
 import { attachAuthToken } from '../src/axios/EchoInstance';
+import { selectOnboardingCompleted } from '../src/redux/selectors/onboardingSelectors';
 
 const AppLayout = () => {
   return (
@@ -21,6 +22,7 @@ const AppLayout = () => {
 
 const Navigation = () => {
   const token = useSelector(selectToken);
+  const onboardingCompleted = useSelector(selectOnboardingCompleted);
   const router = useRouter();
 
   useEffect(() => {
@@ -28,8 +30,13 @@ const Navigation = () => {
       try {
         if (token) {
           attachAuthToken(token);
-          console.log('🔐 Token found, navigating to main app');
-          router.replace('/(tabs)/');
+          if (onboardingCompleted) {
+            console.log('🔐 Token found, onboarding complete');
+            router.replace('/(tabs)/');
+          } else {
+            console.log('🔐 Token found, onboarding incomplete');
+            router.replace('/(onboarding)/');
+          }
         } else {
           attachAuthToken(null);
           console.log('⚠️ No token found, navigating to auth');
@@ -41,7 +48,7 @@ const Navigation = () => {
     };
 
     handleAuthToken();
-  }, [token, router]);
+  }, [token, onboardingCompleted, router]);
 
   return (
             <Stack screenOptions={{ headerShown: false }}>
